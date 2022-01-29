@@ -2,3 +2,51 @@
 .btn.btn-outline-info:hover {
 	color: white !important;
 }
+
+.carousel, .carousel-item > div {
+	height: 40vh;
+}
+
+.carousel-item {
+	background-size: cover;
+	background-position: center;
+}
+
+#products > div {
+	width: 90vw;
+	border-radius: 25px;
+}
+
+#products .view-all-btn {
+	padding-right: 10px;
+	color: #0dcaf0 !important;
+	transition: all 0.2s ease-in-out;
+}
+
+#products .view-all-btn:hover  {
+	padding-right: 0px;
+	color: #99eeff !important;
+	transition: all 0.2s ease-in-out;
+}
+
+#products .view-all-btn .bi {
+	margin-left: 0px;
+	transition: margin 0.2s ease-in-out;
+}
+
+#products .view-all-btn:hover .bi {
+	margin-left: 10px;
+	transition: margin 0.2s ease-in-out;
+}
+
+@media (min-width: 768px) {
+	#products > div {
+		width: 80vw;
+	}
+}
+
+@media (min-width: 1200px) {
+	#products > div {
+		width: 70vw;
+	}
+}
