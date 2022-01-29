@@ -1,0 +1,4 @@
+/* Custom CSS */
+.btn.btn-outline-info:hover {
+	color: white !important;
+}

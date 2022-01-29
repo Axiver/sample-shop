@@ -1,0 +1,16 @@
+/* Custom CSS */
+.item-highlight-row {
+	padding-left: 5%;
+	padding-right: 5%;
+}
+
+.btn.btn-outline-info:hover {
+	color: white !important;
+}
+
+@media (min-width: 768px) {
+	.item-highlight-row {
+		padding-left: 10%;
+		padding-right: 10%;
+	}
+}
