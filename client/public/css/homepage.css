@@ -1,4 +1,10 @@
 /* Custom CSS */
+header {
+	background-image: url('../assets/img/homepage_banner.png');
+	background-size: cover;
+	background-repeat: no-repeat;
+}
+
 .item-highlight-row {
 	padding-left: 5%;
 	padding-right: 5%;
