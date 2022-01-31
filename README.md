@@ -53,10 +53,11 @@ Screenshots of every endpoint (basic and advanced included) being tested are ava
 #### Success Response
 Code: 201 Created
 Content: Sequence of the newly uploaded image
+```
 {
     "sequence": 1
 }
-
+```
 #### Request Body
 Content-Type: multipart/form-data
 Key: "image"
@@ -80,10 +81,11 @@ Code: 500 Internal Server Error
 #### Success Response
 Code: 200 OK
 Content: Total number of images in a product gallery
+```
 {
     "count": 1
 }
-
+```
 #### Request Body
 N/A
 
@@ -113,15 +115,16 @@ Code: 500 Internal Server Error
 Code: 201 Created
 
 #### Request Body
+```
 {
     "productid": 1,
     "discount": 100,
     "start_date": "2022-01-02 00:00:00",
     "end_date": "2022-01-02 23:59:59"
 }
-
+```
 #### Error Response(s)
-##### Incorrect Date time format or Promotion coincides with an existing one or Invalid discount value
+##### Incorrect Date time format or Promotion coincides with an existing one or Invalid discount value or Date time supplied is in the past
 Code: 422 Unprocessable Entity
 
 ##### Unknown Error
@@ -132,6 +135,7 @@ Code: 500 Internal Server Error
 #### Success Response
 Code: 200 OK
 Content: Past, Ongoing and Future promotions for the product
+```
 [{
         "id": 1,
         "productid": 1,
@@ -148,7 +152,7 @@ Content: Past, Ongoing and Future promotions for the product
 },
 ...
 ]
-
+```
 #### Request Body
 N/A
 
@@ -161,6 +165,103 @@ Code: 500 Internal Server Error
 
 
 ### DELETE /promotions/:id
+#### Success Response
+Code: 204 No Content
+
+#### Request Body
+N/A
+
+#### Error Response(s)
+##### Unknown Error
+Code: 500 Internal Server Error
+
+## New Additions for CA2
+### GET /product/sort/searchterms/:searchTerms
+#### Success Response
+Code: 200 OK
+Content: Products with names that match the search terms supplied
+```
+[
+    {
+        "name": "SP AMD Ryzen 3600 Laptop",
+        "description": "Best Laptop",
+        "categoryid": 1,
+        "brand": "SP IT!",
+        "price": 1855.5,
+        "categoryname": "Laptops"
+    },
+    {
+        "name": "ASUS AMD Ryzen 5600x Laptop",
+        "description": "Bester Laptop",
+        "categoryid": 1,
+        "brand": "ASUS",
+        "price": 1949.99,
+        "categoryname": "Laptops"
+    },
+    ...
+]
+```
+#### Request Body
+N/A
+
+#### Error Response(s)
+##### No products matching the provided search terms were found
+Code: 404 Not Found
+
+##### Unknown Error
+Code: 500 Internal Server Error
+
+
+### GET /product/sort/ratings/
+#### Success Response
+Code: 200 OK
+Content: Products sorted based on their ratings in descending order
+```
+[
+    {
+        "name": "SPhone 9000",
+        "productid": 7,
+        "description": "Basically a quantum computer",
+        "categoryid": 3,
+        "brand": "SP IT!",
+        "price": 3845.99,
+        "avgRating": 5,
+        "categoryname": "Mobile Phones"
+    },
+    {
+        "name": "SP AMD Ryzen 3600 Laptop",
+        "productid": 1,
+        "description": "Best Laptop",
+        "categoryid": 1,
+        "brand": "SP IT!",
+        "price": 1855.5,
+        "avgRating": 1.5,
+        "categoryname": "Laptops"
+    },
+    ...
+]
+```
+#### Request Body
+N/A
+
+#### Error Response(s)
+##### Unknown Error
+Code: 500 Internal Server Error
+
+
+### POST /tracking/view/product/:productid
+#### Success Response
+Code: 204 No Content
+
+#### Request Body
+N/A
+
+#### Error Response(s)
+##### Unknown Error
+Code: 500 Internal Server Error
+
+
+### POST /tracking/view/product/:productid
 #### Success Response
 Code: 204 No Content
 

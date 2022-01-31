@@ -19,6 +19,7 @@
   "homepage": "https://github.com/Garlicvideos/BED-CA1#readme",
   "dependencies": {
     "bcrypt": "^5.0.1",
+    "cors": "^2.8.5",
     "express": "^4.17.1",
     "fs": "0.0.1-security",
     "get-stream": "^6.0.1",

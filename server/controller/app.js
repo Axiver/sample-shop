@@ -11,6 +11,7 @@ const fs = require("fs");
 const path = require("path");
 const getStream = require("get-stream");
 const { imageHash } = require("image-hash");
+const cors = require("cors");
 
 //Models
 const User = require("../models/User");
@@ -20,6 +21,7 @@ const Interest = require("../models/Interest");
 const Promotion = require("../models/Promotion");
 
 //Hook middlewares
+app.use(cors());
 app.use(bodyParser.json());
 
 //-- Configure multer --//
@@ -293,6 +295,26 @@ app.post("/interest/:userid", (req, res) => {
 });
 
 /**
+ * Increments the number of views of a particular product
+ */
+app.post("/tracking/view/product/:productid", (req, res) => {
+    //Obtain the product id from the request parameters
+    let productid = req.params.productid;
+    //Indicate category interest for the user
+    Interest.productViewed(productid, (err) => {
+        //Check if there was an error
+        if (err) {
+            //There was an error
+            console.log(err);
+            return res.status(500).send();
+        } else {
+            //There was no error
+            return res.status(204).send();
+        }
+    });
+});
+
+/**
  * Creates a new promotional period
  */
 app.post("/promotions/", (req, res) => {
@@ -409,6 +431,74 @@ app.get("/product/:id", (req, res) => {
                 response.categoryname = response.category;
                 delete response.category;
                 return res.status(200).send(response);
+            } else {
+                //No results were returned
+                return res.status(500).send();
+            }
+        }
+    });
+});
+
+/**
+ * Retrieves products based on search terms
+ */
+ app.get("/product/sort/searchterms/:searchTerms", (req, res) => {
+    //Get the search terms supplied in the request parameter
+    let searchTerms = req.params.searchTerms;
+    console.log(searchTerms);
+    //Format the searchterms into an array
+    searchTerms = searchTerms.split(",");
+    console.log(searchTerms);
+    //Retrieves products based on the search terms supplied
+    Product.getProductBySearchTerms(searchTerms, (err, result) => {
+        //Checks if there was an error
+        if (err) {
+            //There was an error
+            console.log(err);
+            return res.status(500).send();
+        } else {
+            //There was no error, check if any results were returned
+            if (result.length > 0) {
+                //There was at least 1 row returned, format the response
+                for (let i = 0; i < result.length; i++) {
+                    let element = result[i];
+                    element.categoryname = element.category;
+                    delete element.category;
+                    //Update the result array
+                    result[i] = element;
+                }
+                return res.status(200).send(result);
+            } else {
+                //No results were returned
+                return res.status(404).send();
+            }
+        }
+    });
+});
+
+/**
+ * Retrieves products based on their ratings (in descending order)
+ */
+ app.get("/product/sort/ratings/", (req, res) => {
+    //Retrieves products based on their ratings
+    Product.getProductByRatings((err, result) => {
+        //Checks if there was an error
+        if (err) {
+            //There was an error
+            console.log(err);
+            return res.status(500).send();
+        } else {
+            //There was no error, check if any results were returned
+            if (result.length > 0) {
+                //There was at least 1 row returned, format the response
+                for (let i = 0; i < result.length; i++) {
+                    let element = result[i];
+                    element.categoryname = element.category;
+                    delete element.category;
+                    //Update the result array
+                    result[i] = element;
+                }
+                return res.status(200).send(result);
             } else {
                 //No results were returned
                 return res.status(500).send();

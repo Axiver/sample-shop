@@ -32,7 +32,7 @@ const Interest = {
      * @param {number[]} categoryids An array containing the ids of the categories the user is interested in
      * @param {{(err: null | any): void}} callback The callback to invoke once the operation is completed
      */
-    createInterest(userid, categoryids, callback) {
+    createInterest: (userid, categoryids, callback) => {
         //Establish a connection to the database
         connectDB((err, dbConn) => {
             //Checks if there was an error
@@ -85,6 +85,55 @@ const Interest = {
                         }
                     });
                 }
+            }
+        });
+    },
+    /**
+     * Indicates product view
+     * @param {*} productid The id of the product viewed
+     * @param {{(err: null | any, dbConn: null | object): void}} callback The callback to pass the db connection to
+     */
+    productViewed: (productid, callback) => {
+        //Establish a connection to the database
+        connectDB((err, dbConn) => {
+            //Checks if there was an error
+            if (err) {
+                //There was an error
+                return callback(err);
+            } else {
+                //Proceed with query
+                var sqlQuery = "SELECT views FROM products WHERE productid = ?";
+                dbConn.query(sqlQuery, productid, (err, result) => {
+                    //Checks if there was an error
+                    if (err) {
+                        //There was an error
+                        return callback(err);
+                    } else {
+                        //There was no error, check if any rows were returned
+                        if (result.length > 0) {
+                            console.log("res:", result);
+                            //At least 1 row was returned. Update the view count
+                            sqlQuery = "UPDATE products SET views = ? WHERE productid = ?";
+                            dbConn.query(sqlQuery, result[0] + 1, (err, results) => {
+                                //Checks if there was an error
+                                if (err) {
+                                    //There was an error
+                                    return callback(err);
+                                } else {
+                                    //There was no error
+                                    //Closes the db connection
+                                    dbConn.end();
+                                    return callback(null);
+                                }
+                            });
+                        } else {
+                            //The product does not exist
+                            //Closes the db connection
+                            dbConn.end();
+                            return callback("Product with given id does not exist");
+                        }
+                    }
+                });
             }
         });
     }

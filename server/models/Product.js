@@ -25,6 +25,37 @@ function connectDB(callback) {
     });
 }
 
+/**
+ * Sorts returned rows by a particular column (in desc order)
+ * @param {string} key Name of the column
+ * @param {[]} data Data to sort
+ * @param {boolean} reverse Whether or not to sort in asc order instead
+ * @param {{(err: null | any, result: null | object): void}} callback The callback to invoke once the operation is completed
+ */
+function sortBy(key, data, reverse, callback) {
+    //Sort the data array according to the column supplied
+    for (let i = 0; i < data.length - 1; i++) {
+        //Get the value of the column specified for the item at the current index
+        let currValue = data[i][key];
+        //Get the value of the column specified for the item one index down
+        let nextValue = data[i + 1][key];
+        //Check if the value of the current item < value of the item one index down (vice-versa if reverse is set to true)
+        if (!reverse && currValue < nextValue || reverse && currValue > nextValue) {
+            //Value of the item at the current index is less than that of the item one index down
+            //Swap the places of the item at the current index and the item one index down
+            let currIndex = data[i];
+            data[i] = data[i + 1];
+            data[i + 1] = currIndex;
+
+            //Restart the loop
+            i = -1;
+        }
+    }
+
+    //Loop over, return the result
+    return callback(null, data);
+}
+
 //Declare available methods for interacting with the db
 const Product = {
     /**
@@ -91,6 +122,107 @@ const Product = {
                     } else {
                         //There was no error, return the results
                         return callback(null, results);
+                    }
+                });
+            }
+        });
+    },
+    /**
+     * Gets info of products matching a particular search term
+     * @param {[]} searchTerms Search terms 
+     * @param {{(err: null | any, result: null | object): void}} callback The callback to invoke once the operation is completed
+     */
+    getProductBySearchTerms: (searchTerms, callback) => {
+        searchTerms = searchTerms.map((i) => "%" + i + "%");
+        //Establish a connection to the database
+        connectDB((err, dbConn) => {
+            //Checks if there was an error
+            if (err) {
+                //There was an error
+                return callback(err, null);
+            } else {
+                //There was no error
+                //Proceed with SQL query
+                //Construct the query
+                let sqlQuery = "SELECT name, products.description, products.categoryid, categories.category, brand, price FROM products, categories WHERE categories.categoryid = products.categoryid";
+                for (let i = 0; i < searchTerms.length; i++) {
+                    sqlQuery += " AND name LIKE ?";
+                }
+                dbConn.query(sqlQuery, searchTerms, (err, results) => {
+                    //Closes the db connection
+                    dbConn.end();
+                    //Checks if there was an error
+                    if (err) {
+                        //There was an error
+                        return callback(err, null);
+                    } else {
+                        //There was no error, return the results
+                        return callback(null, results);
+                    }
+                });
+            }
+        });
+    },
+    /**
+     * Gets info of products based on their ratings (From highest to lowest)
+     * @param {{(err: null | any, result: null | object): void}} callback The callback to invoke once the operation is completed
+     */
+    getProductByRatings: (callback) => {
+        //Establish a connection to the database
+        connectDB((err, dbConn) => {
+            //Checks if there was an error
+            if (err) {
+                //There was an error
+                return callback(err, null);
+            } else {
+                //There was no error
+                //Proceed with SQL query (Selects all products)
+                let sqlQuery = "SELECT name, products.productid, products.description, products.categoryid, categories.category, brand, price FROM products, categories WHERE categories.categoryid = products.categoryid";
+                dbConn.query(sqlQuery, (err, results) => {
+                    //Checks if there was an error
+                    if (err) {
+                        //There was an error
+                        return callback(err, null);
+                    } else {
+                        //There was no error, loop through the results and get the ratings for each product
+                        for (let i = 0; i < results.length; i++) {
+                            let sqlQuery = "SELECT rating FROM reviews WHERE productid = ?";
+                            dbConn.query(sqlQuery, results[i].productid, (err, ratings) => {
+                                //Checks if there was an error
+                                if (err) {
+                                    //There was an error
+                                    return callback(err, null);
+                                } else {
+                                    //There was no error, check if there are any rows returned
+                                    if (ratings.length > 0) {
+                                        //There was at least 1 row returned
+                                        //Add up the ratings for the current product
+                                        let avgRatings = 0;
+                                        for (let j = 0; j < ratings.length; j++) {
+                                            avgRatings += ratings[j].rating;
+                                        }
+                                        //Calculate the average ratings for the current product
+                                        avgRatings /= ratings.length;
+                                        //Add the avg ratings to the results array
+                                        results[i].avgRating = avgRatings;
+                                    } else {
+                                        //No rows were returned. This product has 0 ratings, so we just set the avg ratings to be 0
+                                        results[i].avgRating = 0;
+                                    }
+                                }
+
+                                //Checks if this is the final loop
+                                if (i == results.length - 1) {
+                                    //This is the final loop, close the db connection
+                                    dbConn.end();
+                                    //Sort the results array by avg ratings
+                                    sortBy("avgRating", results, false, (err, data) => {
+                                        //Results array has been sorted, return the result
+                                        return callback(null, data);
+                                    });
+                                }
+                            });
+                        }
                     }
                 });
             }
