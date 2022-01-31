@@ -12,7 +12,7 @@
 	background-position: center;
 }
 
-#products > div {
+section > div {
 	width: 90vw;
 	border-radius: 25px;
 }
@@ -40,13 +40,13 @@
 }
 
 @media (min-width: 768px) {
-	#products > div {
+	section > div {
 		width: 80vw;
 	}
 }
 
 @media (min-width: 1200px) {
-	#products > div {
+	section > div {
 		width: 70vw;
 	}
 }
