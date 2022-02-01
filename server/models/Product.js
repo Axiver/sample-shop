@@ -229,6 +229,37 @@ const Product = {
         });
     },
     /**
+     * Gets info of products under a particular category
+     * @param {string} categoryid Id of the category
+     * @param {{(err: null | any, result: null | object): void}} callback The callback to invoke once the operation is completed
+     */
+    getProductByCategory: (categoryid, callback) => {
+        //Establish a connection to the database
+        connectDB((err, dbConn) => {
+            //Checks if there was an error
+            if (err) {
+                //There was an error
+                return callback(err, null);
+            } else {
+                //There was no error
+                //Proceed with SQL query 
+                let sqlQuery = "SELECT productid, name, products.description, products.categoryid, brand, price FROM products WHERE products.categoryid = ?";
+                dbConn.query(sqlQuery, categoryid, (err, results) => {
+                    //Closes the db connection
+                    dbConn.end();
+                    //Checks if there was an error
+                    if (err) {
+                        //There was an error
+                        return callback(err, null);
+                    } else {
+                        //There was no error, return the results
+                        return callback(null, results);
+                    }
+                });
+            }
+        });
+    },
+    /**
      * Deletes a product with a specific id
      * @param {number} productid The id of the product to lookup
      * @param {{(err: null | any, result: null | object): void}} callback The callback to invoke once the operation is completed

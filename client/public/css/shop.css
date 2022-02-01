@@ -4,7 +4,7 @@
 }
 
 .carousel, .carousel-item > div {
-	height: 40vh;
+	height: 30vh;
 }
 
 .carousel-item {
@@ -17,29 +17,32 @@ section > div {
 	border-radius: 25px;
 }
 
-#products .view-all-btn {
+#categories .view-all-btn {
 	padding-right: 10px;
 	color: #0dcaf0 !important;
 	transition: all 0.2s ease-in-out;
 }
 
-#products .view-all-btn:hover  {
+#categories .view-all-btn:hover  {
 	padding-right: 0px;
 	color: #99eeff !important;
 	transition: all 0.2s ease-in-out;
 }
 
-#products .view-all-btn .bi {
+#categories .view-all-btn .bi {
 	margin-left: 0px;
 	transition: margin 0.2s ease-in-out;
 }
 
-#products .view-all-btn:hover .bi {
+#categories .view-all-btn:hover .bi {
 	margin-left: 10px;
 	transition: margin 0.2s ease-in-out;
 }
 
 @media (min-width: 768px) {
+	.carousel, .carousel-item > div {
+		height: 40vh;
+	}
 	section > div {
 		width: 80vw;
 	}

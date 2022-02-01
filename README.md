@@ -271,3 +271,30 @@ N/A
 #### Error Response(s)
 ##### Unknown Error
 Code: 500 Internal Server Error
+
+
+### GET /product/filter/category/:categoryid
+#### Success Response
+Code: 200 OK
+Content: Products filtered based on their category
+```
+[
+    {
+        "name": "SPhone 9000",
+        "productid": 7,
+        "description": "Basically a quantum computer",
+        "categoryid": 3,
+        "brand": "SP IT!",
+        "price": 3845.99,
+        "avgRating": 5,
+        "categoryname": "Mobile Phones"
+    },
+    ...
+]
+```
+#### Request Body
+N/A
+
+#### Error Response(s)
+##### Unknown Error
+Code: 500 Internal Server Error

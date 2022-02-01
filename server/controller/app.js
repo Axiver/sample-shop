@@ -508,6 +508,32 @@ app.get("/product/:id", (req, res) => {
 });
 
 /**
+ * Retrieves products under a particular category
+ */
+ app.get("/product/filter/category/:categoryid", (req, res) => {
+    //Retrieves the category id from the request url
+    const categoryid = req.params.categoryid;
+    //Retrieves products under a particular category
+    Product.getProductByCategory(categoryid, (err, result) => {
+        //Checks if there was an error
+        if (err) {
+            //There was an error
+            console.log(err);
+            return res.status(500).send();
+        } else {
+            //There was no error, check if any results were returned
+            if (result.length > 0) {
+                //There was at least 1 row returned
+                return res.status(200).send(result);
+            } else {
+                //No results were returned
+                return res.status(500).send();
+            }
+        }
+    });
+});
+
+/**
  * Retrieves all reviews for a product, including the username of the reviewer
  */
 app.get("/product/:id/reviews", (req, res) => {

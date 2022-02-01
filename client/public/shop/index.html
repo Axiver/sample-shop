@@ -19,112 +19,6 @@
         <link href="../css/shop.css" rel="stylesheet" />
     </head>
     <body>
-        <!-- Navbar -->
-        <nav class="navbar navbar-expand-sm navbar-light bg-white topbar py-0">
-            <div class="container-fluid">
-                <!-- Branding -->
-                <a class="navbar-brand font-weight-bold ms-3 float-start" href="#">
-                    <img class="align-text-bottom" src="../assets/img/sp_logo.jpg" width="30" height="30" class="d-inline-block align-top" alt="">
-                    <span class="h4">IT!</span>
-                </a>
-
-                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNavigation" aria-controls="navbarNavigation" aria-expanded="false" aria-label="Toggle navigation">
-                    <span class="navbar-toggler-icon"></span>
-                </button>
-
-                <!-- Topbar Navbar -->
-                <div class="collapse navbar-collapse justify-content-between" id="navbarNavigation">
-                    <ul class="navbar-nav me-2">
-
-                        <!-- Navigation buttons -->
-                        <li class="nav-item">
-                            <a class="nav-link text-gray-800 fs-5" href="/">Home</a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link text-gray-600 fs-5 disabled" href="#">Shop</a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link text-gray-600 fs-5" href="#">Link</a>
-                        </li>
-
-                        <!-- Nav Item - Search Dropdown (Visible Only XS) -->
-                        <li class="nav-item dropdown no-arrow d-sm-none">
-                            <a class="nav-link dropdown-toggle" href="#" id="searchDropdown" role="button"
-                                data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                                <i class="fas fa-search fa-fw"></i>
-                            </a>
-                            <!-- Dropdown - Messages -->
-                            <div class="dropdown-menu dropdown-menu-right p-3 shadow animated--grow-in"
-                                aria-labelledby="searchDropdown">
-                                <form class="form-inline mr-auto w-100 navbar-search">
-                                    <div class="input-group">
-                                        <input type="text" class="form-control bg-light border-0 small"
-                                            placeholder="Search for..." aria-label="Search"
-                                            aria-describedby="basic-addon2">
-                                        <div class="input-group-append">
-                                            <button class="btn btn-primary" type="button">
-                                                <i class="fas fa-search fa-sm"></i>
-                                            </button>
-                                        </div>
-                                    </div>
-                                </form>
-                            </div>
-                        </li>
-                    </ul>
-
-                    <!-- Nav Item - Search Bar -->
-                    <form class="d-none d-sm-inline-block form-inline w-50 navbar-search">
-                        <div class="input-group">
-                            <div class="dropdown me-4">
-                                <button class="btn btn-secondary dropdown-toggle" type="button" id="dropdownMenuButton1" data-bs-toggle="dropdown" aria-expanded="false">
-                                    Category
-                                </button>
-                                <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton1">
-                                    <li><a class="dropdown-item" href="#">Action</a></li>
-                                    <li><a class="dropdown-item" href="#">Another action</a></li>
-                                    <li><a class="dropdown-item" href="#">Something else here</a></li>
-                                </ul>
-                            </div>
-                            <input type="text" class="form-control bg-light border-0 small" placeholder="Search for an item"
-                                aria-label="Search" aria-describedby="basic-addon2">
-                            <div class="input-group-append">
-                                <button class="btn btn-primary" type="button">
-                                    <i class="bi bi-search"></i>
-                                </button>
-                            </div>
-                        </div>
-                    </form>
-
-                    <!-- Nav Item - User Information -->
-                    <div class="nav-item dropdown no-arrow">
-                        <a class="nav-link dropdown-toggle" href="#" id="userDropdown" role="button"
-                            data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                            <span class="me-2 d-none d-lg-inline text-gray-600">Douglas McGee</span>
-                            <img class="img-profile rounded-circle"
-                                src="../assets/img/undraw_profile.svg">
-                        </a>
-                        <!-- Dropdown - User Information -->
-                        <div class="dropdown-menu dropdown-menu-right shadow animated--grow-in"
-                            aria-labelledby="userDropdown">
-                            <a class="dropdown-item" href="#">
-                                <i class="bi bi-person-fill me-2 text-gray-400"></i>
-                                Profile
-                            </a>
-                            <a class="dropdown-item" href="#">
-                                <i class="bi bi-gear-wide-connected me-2 text-gray-400"></i>
-                                Settings
-                            </a>
-                            <div class="dropdown-divider"></div>
-                            <a class="dropdown-item" href="#" data-toggle="modal" data-target="#logoutModal">
-                                <i class="bi bi-box-arrow-right me-2 text-gray-400"></i>
-                                Logout
-                            </a>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </nav>
-        <!-- End of Navbar -->
         <!-- Header-->
         <header>
             <div id="carouselExampleIndicators" class="carousel overflow-hidden slide" data-bs-ride="carousel">
@@ -178,64 +72,11 @@
                 <div class="py-4">
                     <h2>Featured Items</h2>
                 </div>
-                <div id="featured-items" class="row row-cols-xxl-5 justify-content-center g-4"></div>
+                <div id="featured-items" class="row row-cols-2 row-cols-xxl-5 g-4"></div>
             </div>
         </section>
         <!-- Categories Section-->
-        <section id="products" class="py-5">
-            <!-- Laptops Category -->
-            <div class="mt-4 pt-4 mx-auto shadow">
-                <div class="d-flex container-fluid px-4 px-lg-5 justify-content-between align-items-center">
-                    <div>
-                        <h3>Laptops</h3>
-                    </div>
-                    <div class="d-inline-flex view-all-btn">
-                        <a class="fs-5 text-reset text-decoration-none" href="#">View all</a>
-                        <i class="bi bi-arrow-right-short fs-5"></i>
-                    </div>
-                </div>
-                <div class="d-flex flex-row flex-nowrap overflow-auto py-4 justify-content-start">
-                    <div class="col-8 col-xxl-2 mb-3 mb-md-0 me-0 me-4 ms-4 ms-lg-5 flex">
-                        <div class="card px-0">
-                            <!-- Product image-->
-                            <img height="100%" width="100%" style="object-fit: cover;" class="card-img-top" src="https://dummyimage.com/450x300/dee2e6/6c757d.jpg" alt="..." />
-                            <!-- Product details-->
-                            <div class="card-body p-4">
-                                <div class="text-center">
-                                    <!-- Product name-->
-                                    <h5 class="card-title">Product Name</h5>
-                                    <!-- Product price-->
-                                    <p class="card-text">$40.00 - $80.00</p>
-                                </div>
-                            </div>
-                            <!-- Product actions-->
-                            <div class="card-footer p-4 pt-0 border-top-0 bg-transparent">
-                                <div class="text-center"><a class="btn btn-outline-success mt-auto" href="#">View item</a></div>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="col-8 col-xxl-2 mb-3 mb-md-0 mx-4 flex">
-                        <div class="card px-0">
-                            <!-- Product image-->
-                            <img height="100%" width="100%" style="object-fit: cover;" class="card-img-top" src="https://dummyimage.com/450x300/dee2e6/6c757d.jpg" alt="..." />
-                            <!-- Product details-->
-                            <div class="card-body p-4">
-                                <div class="text-center">
-                                    <!-- Product name-->
-                                    <h5 class="fw-bolder">Fancy Product</h5>
-                                    <!-- Product price-->
-                                    $40.00 - $80.00
-                                </div>
-                            </div>
-                            <!-- Product actions-->
-                            <div class="card-footer p-4 pt-0 border-top-0 bg-transparent">
-                                <div class="text-center"><a class="btn btn-outline-success mt-auto" href="#">View item</a></div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </section>
+        <section id="categories" class="py-5"></section>
         <!-- Footer-->
         <footer class="py-5 bg-dark">
             <div class="container"><p class="m-0 text-center text-white">Copyright &copy; SP IT! 2022</p></div>
