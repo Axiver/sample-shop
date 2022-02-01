@@ -1,0 +1,55 @@
+/* Custom CSS */
+.btn.btn-outline-info:hover {
+	color: white !important;
+}
+
+.carousel, .carousel-item > div {
+	height: 30vh;
+}
+
+.carousel-item {
+	background-size: cover;
+	background-position: center;
+}
+
+section > div {
+	width: 90vw;
+	border-radius: 25px;
+}
+
+#categories .view-all-btn {
+	padding-right: 10px;
+	color: #0dcaf0 !important;
+	transition: all 0.2s ease-in-out;
+}
+
+#categories .view-all-btn:hover  {
+	padding-right: 0px;
+	color: #99eeff !important;
+	transition: all 0.2s ease-in-out;
+}
+
+#categories .view-all-btn .bi {
+	margin-left: 0px;
+	transition: margin 0.2s ease-in-out;
+}
+
+#categories .view-all-btn:hover .bi {
+	margin-left: 10px;
+	transition: margin 0.2s ease-in-out;
+}
+
+@media (min-width: 768px) {
+	.carousel, .carousel-item > div {
+		height: 40vh;
+	}
+	section > div {
+		width: 80vw;
+	}
+}
+
+@media (min-width: 1200px) {
+	section > div {
+		width: 70vw;
+	}
+}

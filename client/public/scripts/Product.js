@@ -131,7 +131,7 @@ Product.query = {
                                 ${renderedPrice}
                             </div>
                             <!-- View Item Button -->
-                            <div class="text-center d-inline-block"><a class="btn btn-outline-success mt-auto" href="/">View item</a></div>
+                            <div class="text-center d-inline-block"><a class="btn btn-outline-success mt-auto" href="/product/${productid}">View item</a></div>
                         </div>
                     </div>
                 </div>

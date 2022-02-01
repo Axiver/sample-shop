@@ -9,7 +9,7 @@ const navbar = {
 		return (
 			`
 			<!-- Navbar -->
-			<nav class="navbar navbar-expand-sm navbar-light bg-white topbar py-0">
+			<nav class="navbar navbar-expand-sm navbar-light bg-white topbar py-0 ${(page == "product") ? "shadow" : null}">
 				<div class="container-fluid">
 					<!-- Branding -->
 					<a class="navbar-brand font-weight-bold ms-3 float-start" href="/">

@@ -11,8 +11,12 @@ app.get("/shop/", (req, res) => {
   res.sendFile("/public/shop/index.html", { root: __dirname });
 });
 
+app.get("/product/:productid", (req, res) => {
+  res.sendFile("/public/product/index.html", { root: __dirname });
+});
+
 app.get("/login/", (req, res) => {
-    res.sendFile("/public/login.html", { root: __dirname });
+  res.sendFile("/public/login.html", { root: __dirname });
 });
 
 app.get("/register/", (req, res) => {
