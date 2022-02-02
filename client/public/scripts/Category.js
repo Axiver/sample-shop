@@ -9,7 +9,7 @@ Category.query = {
      */
     getAll: (callback) => {
         const baseUrl = window.location.origin;
-        const reqUrl = baseUrl.replace(":3001", "") + ':3000/category';
+        const reqUrl = baseUrl.replace(":3001", "") + ':3000/api/category';
         axios({
             method: 'get',
             url: reqUrl,

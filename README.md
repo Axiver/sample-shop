@@ -97,7 +97,10 @@ Code: 500 Internal Server Error
 ### GET /product/:id/image/:sequence
 #### Success Response
 Code: 200 OK
-Content: Image file
+Content: URL to image file
+```
+/uploads/03ff01ffe007e007f08fe10fe00fe00ff00ff00ff00fe00fe007e007ff57fc00.png
+```
 
 #### Request Body
 N/A

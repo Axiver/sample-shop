@@ -1,3 +1,6 @@
+//-- Global variables --//
+const baseUrl = window.location.origin.replace(":3001", ":3000");
+
 //-- Functions --//
 //Query requests
 let Product = {};
@@ -9,8 +12,7 @@ Product.query = {
      * @param {()} callback Invoked when the operation is completed
      */
     featured: (callback) => {
-        const baseUrl = window.location.origin;
-        const reqUrl = baseUrl.replace(":3001", "") + ':3000/product/sort/ratings/';
+        const reqUrl = baseUrl + '/api/product/sort/ratings/';
         axios({
             method: 'get',
             url: reqUrl,
@@ -36,8 +38,7 @@ Product.query = {
      */
     byCategory: (categoryid, callback) => {
         return new Promise((resolve, reject) => {
-            const baseUrl = window.location.origin;
-            const reqUrl = baseUrl.replace(":3001", "") + ':3000/product/filter/category/' + categoryid;
+            const reqUrl = baseUrl + '/api/product/filter/category/' + categoryid;
             axios({
                 method: 'get',
                 url: reqUrl,
@@ -62,8 +63,7 @@ Product.query = {
      * @param {()} callback Invoked when the operation is completed
      */
     coverImage: (productid, callback) => {
-        const baseUrl = window.location.origin;
-        const reqUrl = baseUrl.replace(":3001", "") + `:3000/product/${productid}/image/1`;
+        const reqUrl = baseUrl + `/api/product/${productid}/image/1`;
         axios({
             method: 'get',
             url: reqUrl,
@@ -101,7 +101,11 @@ Product.query = {
         let renderedPrice = "";
 
         //Obtain the product image if any
-        Product.query.coverImage(productid, (productImageUrl) => {
+        Product.query.coverImage(productid, (result) => {
+            //Check if there are any product images for this item
+            let productImageUrl = baseUrl + result.data;
+            if (result.data == null)
+                productImageUrl = "/assets/img/default.png";
             //Check if there are any discounts for the current item
             if (!discount) {
                 //There are no ongoing discounts
@@ -116,7 +120,7 @@ Product.query = {
                 <div class="col d-flex">
                     <div class="card px-0 shadow border-0">
                         <!-- Product image-->
-                        <img height="55%" width="100%" style="object-fit: cover;" class="card-img-top" src="/assets/productImages/goliathus.jpg" alt="..." />
+                        <img height="55%" width="100%" style="object-fit: cover;" class="card-img-top" src="${productImageUrl}" alt="..." />
                         <!-- Product details-->
                         <div class="card-body p-4">
                             <div>
