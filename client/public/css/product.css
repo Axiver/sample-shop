@@ -1,0 +1,15 @@
+#product-image img {
+	object-fit: cover;
+}
+
+.stacked-star {
+	display: grid;
+}
+
+.stacked-star i {
+	grid-area: 1 / 1 / 1 / 1;
+}
+
+#recommended img {
+	object-fit: cover;
+}

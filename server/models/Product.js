@@ -90,6 +90,7 @@ const Product = {
                         return callback(err, null);
                     } else {
                         //There was no error, return the results
+                        dbConn.end();
                         return callback(null, results);
                     }
                 });
@@ -149,15 +150,62 @@ const Product = {
                     sqlQuery += " AND name LIKE ?";
                 }
                 dbConn.query(sqlQuery, searchTerms, (err, results) => {
-                    //Closes the db connection
-                    dbConn.end();
                     //Checks if there was an error
                     if (err) {
                         //There was an error
                         return callback(err, null);
                     } else {
+                        //Closes the db connection
+                        dbConn.end();
+
                         //There was no error, return the results
                         return callback(null, results);
+                    }
+                });
+            }
+        });
+    },
+    /**
+     * Gets a product's average ratings
+     * @param {number} productid The id of the product
+     * @param {{(err: null | any, result: null | object): void}} callback The callback to invoke once the operation is completed
+     */
+    getProductAverageRatings: (productid, callback) => {
+        //Establish a connection to the database
+        connectDB((err, dbConn) => {
+            //Checks if there was an error
+            if (err) {
+                //There was an error
+                return callback(err, null);
+            } else {
+                //Proceed with query
+                let sqlQuery = "SELECT rating FROM reviews WHERE productid = ?";
+                dbConn.query(sqlQuery, productid, (err, ratings) => {
+                    //Checks if there was an error
+                    if (err) {
+                        //There was an error
+                        return callback(err, null);
+                    } else {
+                        //Closes the db connection
+                        dbConn.end();
+
+                        //There was no error, check if there are any rows returned
+                        if (ratings.length > 0) {
+                            //There was at least 1 row returned
+                            //Add up the ratings for the current product
+                            let avgRatings = 0;
+                            for (let j = 0; j < ratings.length; j++) {
+                                avgRatings += ratings[j].rating;
+                            }
+                            //Calculate the average ratings for the current product
+                            avgRatings /= ratings.length;
+
+                            //Return the result
+                            return callback(null, avgRatings);
+                        } else {
+                            //No rows were returned. This product has 0 ratings, so we just return null
+                            return callback(null);
+                        }
                     }
                 });
             }
@@ -186,30 +234,13 @@ const Product = {
                     } else {
                         //There was no error, loop through the results and get the ratings for each product
                         for (let i = 0; i < results.length; i++) {
-                            let sqlQuery = "SELECT rating FROM reviews WHERE productid = ?";
-                            dbConn.query(sqlQuery, results[i].productid, (err, ratings) => {
+                            //Get a product's average ratings and append it to the results array
+                            Product.getProductAverageRatings(results[i].productid, (err, avgRatings) => {
                                 //Checks if there was an error
-                                if (err) {
-                                    //There was an error
+                                if (err)
                                     return callback(err, null);
-                                } else {
-                                    //There was no error, check if there are any rows returned
-                                    if (ratings.length > 0) {
-                                        //There was at least 1 row returned
-                                        //Add up the ratings for the current product
-                                        let avgRatings = 0;
-                                        for (let j = 0; j < ratings.length; j++) {
-                                            avgRatings += ratings[j].rating;
-                                        }
-                                        //Calculate the average ratings for the current product
-                                        avgRatings /= ratings.length;
-                                        //Add the avg ratings to the results array
-                                        results[i].avgRating = avgRatings;
-                                    } else {
-                                        //No rows were returned. This product has 0 ratings, so we just set the avg ratings to be 0
-                                        results[i].avgRating = 0;
-                                    }
-                                }
+
+                                results[i].avgRatings = avgRatings;
 
                                 //Checks if this is the final loop
                                 if (i == results.length - 1) {

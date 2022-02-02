@@ -39,7 +39,7 @@ $(document).ready(async () => {
                 let currProduct = data[i];
 
                 //Render the product card
-                const result = await Product.render(currProduct.productid, currProduct.name, currProduct.price);
+                const result = await Product.render.productCard(currProduct.productid, currProduct.name, currProduct.price);
 
                 //Append to html view
                 $("#featured-items").append(result);
@@ -83,7 +83,7 @@ $(document).ready(async () => {
                             const product = products[j];
                             
                             //Render the product card
-                            const productCard = await Product.render(product.productid, product.name, product.price);
+                            const productCard = await Product.render.productCard(product.productid, product.name, product.price);
 
                             //Append to html view
                             $(`#${categoryName.replace(" ", "_")}-content`).append(productCard);

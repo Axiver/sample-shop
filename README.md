@@ -301,3 +301,18 @@ N/A
 #### Error Response(s)
 ##### Unknown Error
 Code: 500 Internal Server Error
+
+
+### GET /:id/reviews/average
+#### Success Response
+Code: 200 OK
+Content: Average rating of a particular product
+```
+5
+```
+#### Request Body
+N/A
+
+#### Error Response(s)
+##### Unknown Error
+Code: 500 Internal Server Error

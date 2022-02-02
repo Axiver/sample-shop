@@ -307,6 +307,26 @@ router.get("/:id/reviews", (req, res) => {
 });
 
 /**
+ * Retrieves the average ratings for a particular product
+ */
+router.get("/:id/reviews/average", (req, res) => {
+    //Get the product id supplied in the request parameter
+    let productid = req.params.id;
+    //Retrieves the average ratings of the product with the productid supplied
+    Product.getProductAverageRatings(productid, (err, result) => {
+        //Checks if there was an error
+        if (err) {
+            //There was an error
+            console.log(err);
+            return res.status(500).send();
+        } else {
+            //There was no error, return the result
+            return res.status(200).send(`${result}`);
+        }
+    });
+});
+
+/**
  * Gets the total number of images a product has
  */
 router.get("/:id/image", (req, res) => {
