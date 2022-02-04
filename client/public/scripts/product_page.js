@@ -60,8 +60,8 @@ function renderProductImages() {
                 const imageUrl = await getProductImage(productid, i);
 
                 //Render components for the carousel
-                const carouselIndicator = Product.render.imageCarouselIndicator("#imageCarousel", i - 1);
-                const carouselSlide = Product.render.imageCarouselSlide(imageUrl, (i == 1));
+                const carouselIndicator = Product.render.carousel.imageIndicator("#imageCarousel", i - 1);
+                const carouselSlide = Product.render.carousel.imageSlide(imageUrl, (i == 1));
 
                 //Update the carousel with the rendered components
                 $("#imageCarousel .carousel-indicators").append(carouselIndicator);
@@ -70,8 +70,8 @@ function renderProductImages() {
         } else {
             //There are no images for this product, render the default image
             //Render components for the carousel
-            const carouselIndicator = Product.render.imageCarouselIndicator("#imageCarousel", 0);
-            const carouselSlide = Product.render.imageCarouselSlide(null, true);
+            const carouselIndicator = Product.render.carousel.imageIndicator("#imageCarousel", 0);
+            const carouselSlide = Product.render.carousel.imageSlide(null, true);
 
             //Update the carousel with the rendered components
             $("#imageCarousel .carousel-indicators").append(carouselIndicator);
@@ -103,7 +103,7 @@ function renderProductInfo() {
     const productid = getProductId();
 
     //Retrieve product info
-    Product.query.byId(productid, (response) => {
+    Product.query.by.id(productid, (response) => {
         //Get response data
         const data = response.data;
 
@@ -128,7 +128,7 @@ function renderProductInfo() {
         if (response) {
             //This product has at least 1 rating
             //Render the product rating component
-            const renderedComponent = Product.render.productRating(response);
+            const renderedComponent = Product.render.product.rating(response);
 
             //Append the rendered component to the DOM
             $("#productRating").append(renderedComponent);
@@ -142,14 +142,14 @@ function renderRelatedProducts() {
     const productid = getProductId();
 
     //Retrieve category of product
-    Product.query.byId(productid, (response) => {
+    Product.query.by.id(productid, (response) => {
         //Check if any data was returned
         if (response.data) {
             //Get the category id of the product
             const categoryid = response.data.categoryid;
 
             //Get all products under the same category
-            Product.query.byCategory(categoryid, async (response) => {
+            Product.query.by.category(categoryid, async (response) => {
                 //Get response data
                 const data = response.data;
                 
@@ -177,7 +177,7 @@ function renderRelatedProducts() {
 
                             //This is a different product
                             //Render the product
-                            const renderedProductCard = await Product.render.relatedProductCard(currProduct.productid, currProduct.name, currProduct.price);
+                            const renderedProductCard = await Product.render.product.relatedCard(currProduct.productid, currProduct.name, currProduct.price);
 
                             //Add the rendered product card to the DOM
                             $("#recommended").append(renderedProductCard);

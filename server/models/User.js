@@ -77,7 +77,7 @@ const User = {
      */
     createUser: (userData, callback) => {
         //Deconstruct the userData object
-        ({username, email, contact, password, type} = userData);
+        ({username, email, contact, password} = userData);
         
         //Validates the email to check if the format supplied is valid
         if (validateEmail(email)) {
@@ -241,8 +241,49 @@ const User = {
             return callback("Invalid email", null);
         }
     },
-    authenticate: () => {
-        
+    /**
+     * Authenticates a user login
+     * @param {string} email The user's email address
+     * @param {string} password The user's password
+     * @param {{(err: null | any, result: null | object): void}} callback The callback to invoke once the operation is completed
+     */
+    authenticate: (email, password, callback) => {
+        //Retrieve the hashed password of the user account matching the email address supplied
+        //Establish a connection to the database
+        connectDB((err, dbConn) => {
+            //Checks if there was an error
+            if (err) {
+                //There was an error
+                return callback(err, null);
+            } else {
+                //There was no error
+                //Proceed with SQL query
+                const sqlQuery = "SELECT password, userid FROM users WHERE email = ?";
+                dbConn.query(sqlQuery, [email], (err, results) => {
+                    //Closes the db connection
+                    dbConn.end();
+                    //Checks if there was an error
+                    if (err) {
+                        //There was an error
+                        return callback(err, null);
+                    } else {
+                        //There was no error, check if any rows were returned
+                        if (results.length > 0) {
+                            //An account with the given email address exists
+                            const account = results[0];
+                            //Verify the password
+                            if (bcrypt.compareSync(password, account.password)) {
+                                //Password matches, return the userid
+                                return callback(null, account.userid);
+                            }
+                        }
+
+                        //An account with the given email address does not exist
+                        return callback("invalid account details", null);
+                    }
+                });
+            }
+        });
     }
 }
 

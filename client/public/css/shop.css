@@ -29,13 +29,13 @@ section > div {
 	transition: all 0.2s ease-in-out;
 }
 
-#categories .view-all-btn .bi {
-	margin-left: 0px;
+#categories .view-all-btn .fas {
+	margin-left: 10px;
 	transition: margin 0.2s ease-in-out;
 }
 
-#categories .view-all-btn:hover .bi {
-	margin-left: 10px;
+#categories .view-all-btn:hover .fas {
+	margin-left: 20px;
 	transition: margin 0.2s ease-in-out;
 }
 

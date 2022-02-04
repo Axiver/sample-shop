@@ -9,12 +9,16 @@ const router = express.Router();
 //Models
 const Category = require("../models/Category");
 
+//Middlewares
+const isLoggedInMiddleware = require("../auth/isLoggedInMiddleware");
+const isAdminMiddleware = require("../auth/isAdminMiddleware");
+
 
 //-- POST Request handling --//
 /**
  * Creates a new category
  */
-router.post("/", (req, res) => {
+router.post("/", [isLoggedInMiddleware, isAdminMiddleware], (req, res) => {
     //Trims the user input before passing it through to the createCategory method
     trimObject(req.body, (err, trimmedInput) => {
         //Check if there was an error

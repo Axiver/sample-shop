@@ -33,31 +33,34 @@
                                     <form class="user vstack gap-3">
                                         <div class="row">
                                             <div class="col-sm-6 mb-3 mb-sm-0">
-                                                <input type="text" class="form-control form-control-user" id="exampleFirstName"
-                                                    placeholder="First Name">
+                                                <input type="text" class="form-control form-control-user" id="username"
+                                                    placeholder="Username">
                                             </div>
                                             <div class="col-sm-6">
-                                                <input type="text" class="form-control form-control-user" id="exampleLastName"
-                                                    placeholder="Last Name">
+                                                <input type="text" class="form-control form-control-user" id="contactNumber"
+                                                    placeholder="Contact Number">
                                             </div>
                                         </div>
                                         <div>
-                                            <input type="email" class="form-control form-control-user" id="exampleInputEmail"
+                                            <input type="email" class="form-control form-control-user" id="email"
                                                 placeholder="Email Address">
                                         </div>
                                         <div class="row">
                                             <div class="col-sm-6 mb-3 mb-sm-0">
                                                 <input type="password" class="form-control form-control-user"
-                                                    id="exampleInputPassword" placeholder="Password">
+                                                    id="password" placeholder="Password">
                                             </div>
                                             <div class="col-sm-6">
                                                 <input type="password" class="form-control form-control-user"
-                                                    id="exampleRepeatPassword" placeholder="Repeat Password">
+                                                    id="confirmPassword" placeholder="Confirm Password">
                                             </div>
                                         </div>
-                                        <a href="login.html" class="btn btn-primary btn-user btn-block">
+                                        <div class="row mb-3 mb-sm-0" style="min-height: 1.7rem;">
+                                            <h6 id="errorMessage" class="fs-6 text-danger"></h6>
+                                        </div>
+                                        <button type="button" onclick="formSubmit()" class="btn btn-primary btn-user btn-block">
                                             Register Account
-                                        </a>
+                                        </button>
                                     </form>
                                     <hr>
                                     <div class="text-center">

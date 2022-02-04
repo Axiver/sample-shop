@@ -1,13 +1,11 @@
-//-- Functions --//
-//Query requests
-let Category = {};
-Category.query = {
+//-- Class --//
+class Category {
     /**
      * Queries the server for product categories
      * Has a timeout of 1000ms
      * @param {()} callback Invoked when the operation is completed
      */
-    getAll: (callback) => {
+    static _getAll(callback) {
         const baseUrl = window.location.origin;
         const reqUrl = baseUrl.replace(":3001", "") + ':3000/api/category';
         axios({
@@ -27,16 +25,13 @@ Category.query = {
             return {data: null};
         });
     }
-}
 
-//-- Main component --//
-Category.render = {
     /**
      * Renders a wrapper for a category
      * @param {string} categoryName The name of the category
      * @returns The rendered component
      */
-    wrapper: (categoryName) => {
+    static _wrapper(categoryName) {
         return (
             `
             <div class="mt-4 pt-4 mx-auto">
@@ -44,14 +39,23 @@ Category.render = {
                     <div>
                         <h3>${categoryName}</h3>
                     </div>
-                    <div class="d-inline-flex view-all-btn">
+                    <div class="d-flex view-all-btn align-items-center">
                         <a class="fs-5 text-reset text-decoration-none" href="#">View all</a>
-                        <i class="bi bi-arrow-right-short fs-5"></i>
+                        <i class="fas fa-chevron-right fs-5"></i>
                     </div>
                 </div>
                 <div id="${categoryName.replace(" ", "_")}-content" class="d-flex flex-row flex-nowrap overflow-auto py-4 row row-cols-2 row-cols-xxl-5 g-4"></div>
             </div>
             `
         );
+    }
+
+    //Expose methods
+    static query = {
+        getAll: this._getAll
+    }
+
+    static render = {
+        wrapper: this._wrapper
     }
 }

@@ -1,18 +1,18 @@
-//-- Global variables --//
-const baseUrl = window.location.origin.replace(":3001", ":3000");
+//-- Class --//
+class Product {
+    //-- Static properties --//
+    //Query url
+    static baseUrl = window.location.origin.replace(":3001", ":3000");
 
-//-- Functions --//
-//Query requests
-let Product = {};
-Product.query = {
+    //-- Query Methods --//
     /**
      * Queries the server for products to feature
      * Has a timeout of 1000ms
      * TODO: calculate products to feature instead of just pulling from /ratings/
      * @param {()} callback Invoked when the operation is completed
      */
-    featured: (callback) => {
-        const reqUrl = baseUrl + '/api/product/sort/ratings/';
+    static _featured(callback) {
+        const reqUrl = Product.baseUrl + '/api/product/sort/ratings/';
         axios({
             method: 'get',
             url: reqUrl,
@@ -29,16 +29,17 @@ Product.query = {
                 callback({data: null});
             return {data: null};
         });
-    },
+    }
+
     /**
      * Queries the server for all products within a certain category
      * Has a timeout of 1000ms
      * @param {number} categoryid The id of the category
      * @param {()} callback Invoked when the operation is completed
      */
-    byCategory: (categoryid, callback) => {
+    static _byCategory(categoryid, callback) {
         return new Promise((resolve, reject) => {
-            const reqUrl = baseUrl + '/api/product/filter/category/' + categoryid;
+            const reqUrl = Product.baseUrl + '/api/product/filter/category/' + categoryid;
             axios({
                 method: 'get',
                 url: reqUrl,
@@ -56,16 +57,17 @@ Product.query = {
                 resolve({data: null});
             });
         });
-    },
+    }
+
     /**
      * Queries the server for information regarding the product matching the specified id
      * Has a timeout of 1000ms
      * @param {number} productid The id of the product
      * @param {()} callback Invoked when the operation is completed
      */
-    byId: (productid, callback) => {
+    static _byId(productid, callback) {
         return new Promise((resolve, reject) => {
-            const reqUrl = baseUrl + '/api/product/' + productid;
+            const reqUrl = Product.baseUrl + '/api/product/' + productid;
             axios({
                 method: 'get',
                 url: reqUrl,
@@ -83,15 +85,16 @@ Product.query = {
                 resolve({data: null});
             });
         });
-    },
+    }
+
     /**
      * Queries the cover image for a product
      * @param {number} productid The id of the product to retrieve the cover image for
      * @param {number} sequenceid The id of the image to be retrieved
      * @param {()} callback Invoked when the operation is completed
      */
-    image: (productid, sequenceid, callback) => {
-        const reqUrl = baseUrl + `/api/product/${productid}/image/${sequenceid}`;
+    static _image(productid, sequenceid, callback) {
+        const reqUrl = Product.baseUrl + `/api/product/${productid}/image/${sequenceid}`;
         axios({
             method: 'get',
             url: reqUrl,
@@ -112,15 +115,16 @@ Product.query = {
                 callback({data: null});
             return {data: null};
         });
-    },
+    }
+
     /**
      * Queries the image gallery for a product
      * @param {number} productid The id of the product to retrieve the image gallery for
      * @param {()} callback Invoked when the operation is completed
      */
-    imageCount: (productid, callback) => {
+    static _imageCount(productid, callback) {
         //Get the number of images a product has
-        const reqUrl = baseUrl + `/api/product/${productid}/image/`;
+        const reqUrl = Product.baseUrl + `/api/product/${productid}/image/`;
         axios({
             method: 'get',
             url: reqUrl,
@@ -144,21 +148,21 @@ Product.query = {
                 callback(0);
             return 0;
         });
-    },
+    }
+
     /**
      * Queries the average rating of a product
      * @param {number} productid The id of the product to retrieve the average ratings for
      * @param {()} callback Invoked when the operation is completed 
      */
-    averageRating: (productid, callback) => {
+    static _averageRating(productid, callback) {
         //Get the number of images a product has
-        const reqUrl = baseUrl + `/api/product/${productid}/reviews/average/`;
+        const reqUrl = Product.baseUrl + `/api/product/${productid}/reviews/average/`;
         axios({
             method: 'get',
             url: reqUrl,
             timeout: 1000
         }).then((response) => {
-            console.log("response: ", response);
             //Return the result
             if (callback)
                 callback(response.data);
@@ -175,15 +179,12 @@ Product.query = {
             return null;
         });
     }
-}
 
-//-- Main component --//
-//Renders a product component
-Product.render = {
-    productRating: (avgRating) => {
+
+    //-- Render Methods --//
+    static _productRating(avgRating) {
         //Check if the product has any ratings at all
-        console.log(avgRating);
-        if (avgRating) {
+        if (avgRating !== null && avgRating !== "undefined") {
             //The product has at least 1 review
             //Calculate the number of stars we need to render
             const filledStarsCount = Math.floor(avgRating);
@@ -227,7 +228,8 @@ Product.render = {
         } else {
             return "";
         }
-    },
+    }
+
      /**
      * Renders a product card
      * @param {number} productid The id of the product
@@ -236,7 +238,7 @@ Product.render = {
      * @param {number} discount Discounts on the product, if any
      * @returns {string} Rendered component
      */
-    productCard: (productid, productName, productPrice, discount) => {
+    static _productCard(productid, productName, productPrice, discount) {
         return new Promise(async (resolve, reject) => {
             //Render the price
             let renderedPrice = "";
@@ -244,7 +246,7 @@ Product.render = {
             //Obtain the product image if any
             Product.query.image(productid, 1, (result) => {
                 //Check if there are any product images for this item
-                let productImageUrl = baseUrl + result.data;
+                let productImageUrl = Product.baseUrl + result.data;
                 if (result.data == null)
                     productImageUrl = "/assets/img/default.png";
                 //Check if there are any discounts for the current item
@@ -259,7 +261,8 @@ Product.render = {
                 //Get the average ratings of the product
                 Product.query.averageRating(productid, (avgRating) => {
                     //Render the rating stars for the product
-                    const productRating = Product.render.productRating(avgRating);
+                    const productRating = Product.render.product.rating(avgRating);
+
                     //Return the component
                     resolve (`
                         <div class="col d-flex">
@@ -289,7 +292,8 @@ Product.render = {
                 });
             });
         });
-    },
+    }
+
     /**
      * Renders a product card for the related section of product pages
      * @param {number} productid The id of the product
@@ -298,7 +302,7 @@ Product.render = {
      * @param {number} discount Discounts on the product, if any
      * @returns {string} Rendered component
      */
-    relatedProductCard: (productid, productName, productPrice, discount) => {
+    static _relatedProductCard(productid, productName, productPrice, discount) {
         return new Promise(async (resolve, reject) => {
             //Render the price
             let renderedPrice = "";
@@ -306,7 +310,7 @@ Product.render = {
             //Obtain the product image if any
             Product.query.image(productid, 1, (result) => {
                 //Format the product image url
-                let productImageUrl = baseUrl + result.data;
+                let productImageUrl = Product.baseUrl + result.data;
 
                 //Check if there are any product images for this item
                 if (result.data == null)
@@ -324,7 +328,7 @@ Product.render = {
                 //Get the average ratings of the product
                 Product.query.averageRating(productid, (avgRating) => {
                     //Render the rating stars for the product
-                    const productRating = Product.render.productRating(avgRating);
+                    const productRating = Product.render.product.rating(avgRating);
 
                     //Return the component
                     resolve (`
@@ -355,29 +359,31 @@ Product.render = {
                 });
             });
         });
-    },
+    }
+
     /**
      * Renders a indicator to be used within a product's image carousel
      * @param {string} elementSelector Selector for the image carousel
      * @param {number} id The id of the carousel indicator
      * @returns {string} Rendered component
      */
-    imageCarouselIndicator: (elementSelector, id) => {
+    static _imageCarouselIndicator(elementSelector, id) {
         //Return the component
         return (
             `
                 <button type="button" data-bs-target="${elementSelector}" data-bs-slide-to="${id}" class="${(id == 0) ? "active" : null}" aria-current="${(id == 0)}" aria-label="Slide ${id+1}"></button>
             `
         )
-    },
+    }
+
     /**
      * Renders a carousel slide to be used within a product's image carousel
      * @param {string} imageUrl A url to the image
      * @param {boolean} active Whether or not this is the active slide in the carousel
      */
-    imageCarouselSlide: (imageUrl, active) => {
+    static _imageCarouselSlide(imageUrl, active) {
         //Format the product image url
-        let productImageUrl = baseUrl + imageUrl;
+        let productImageUrl = Product.baseUrl + imageUrl;
         if (imageUrl == null)
             productImageUrl = "/assets/img/default.png";
         //Return the component
@@ -388,5 +394,30 @@ Product.render = {
                 </div>
             `
         )
+    }
+
+
+    //-- Expose Methods --//
+    static query = {
+        featured: this._featured,
+        by: {
+            category: this._byCategory,
+            id: this._byId
+        },
+        image: this._image,
+        imageCount: this._imageCount,
+        averageRating: this._averageRating
+    }
+
+    static render = {
+        product: {
+            rating: this._productRating,
+            card: this._productCard,
+            relatedCard: this._relatedProductCard
+        },
+        carousel: {
+            imageIndicator: this._imageCarouselIndicator,
+            imageSlide: this._imageCarouselSlide
+        }
     }
 }

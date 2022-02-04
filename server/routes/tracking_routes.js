@@ -17,6 +17,7 @@ const Tracking = require("../models/Tracking");
 router.post("/view/product/:productid", (req, res) => {
     //Obtain the product id from the request parameters
     let productid = req.params.productid;
+    
     //Indicate category interest for the user
     Tracking.productViewed(productid, (err) => {
         //Check if there was an error

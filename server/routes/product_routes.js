@@ -13,6 +13,10 @@ const { imageHash } = require("image-hash");
 //Models
 const Product = require("../models/Product");
 
+//Middlewares
+const isLoggedInMiddleware = require("../auth/isLoggedInMiddleware");
+const isAdminMiddleware = require("../auth/isAdminMiddleware");
+
 
 //-- Configure multer --//
 const upload = multer({
@@ -27,7 +31,10 @@ const upload = multer({
 /**
  * Creates a new product
  */
-router.post("/", (req, res) => {
+router.post("/", [isLoggedInMiddleware, isAdminMiddleware], (req, res) => {
+    //Get the user id of the account the user is logged in to
+    const userid = req.decodedToken.userid;
+
     //Trims the user input before passing it through to the createProduct method
     trimObject(req.body, (err, trimmedInput) => {
         //Check if there was an error
@@ -38,11 +45,17 @@ router.post("/", (req, res) => {
         } else {
             //There was no error
             //Create the product
-            Product.createProduct(trimmedInput, (err, result) => {
+            Product.createProduct(userid, trimmedInput, (err, result) => {
                 //Checks if there was an error
                 if (err) {
                     //There was an error
                     console.log(err);
+                    //Check if the error was because the user was unauthorised
+                    if (err == "unauthorised") {
+                        //User is unauthorised, not an admin account
+                        return res.status(401).send();
+                    }
+
                     return res.status(500).send();
                 } else {
                     //There was no error
@@ -57,9 +70,16 @@ router.post("/", (req, res) => {
 /**
  * Creates a new review for a specific product
  */
-router.post("/:id/review", (req, res) => {
+router.post("/:id/review", isLoggedInMiddleware, (req, res) => {
     //Obtain the product id from the request parameters
     let productid = req.params.id;
+
+    //Check if the user is logged in to the account with the userid that is specified in the request
+    if (req.decodedToken.userid != req.body.userid) {
+        //Userid does not match, user is unauthorised
+        return res.status(401).send();
+    }
+    
     //Trims the user input before passing it through to the createReview method
     trimObject(req.body, (err, trimmedInput) => {
         //Check if there was an error
@@ -88,7 +108,8 @@ router.post("/:id/review", (req, res) => {
 /**
  * Uploads a image to the server for a specific product
  */
-router.post("/:id/image", (req, res) => {
+router.post("/:id/image", [isLoggedInMiddleware, isAdminMiddleware], (req, res) => {
+    //Handle the image upload
     upload(req, res, async (err) => {
         //Checks if there was an error
         if (err) {
@@ -103,6 +124,7 @@ router.post("/:id/image", (req, res) => {
 
         //There was no error, obtain the product id from the request parameters
         let productid = req.params.id;
+
         //Get the file extension
         const fileExt = req.file.originalname.split(".").at(-1).replace(/ /g, "");
 
@@ -155,6 +177,7 @@ router.post("/:id/image", (req, res) => {
         });
     })
 });
+
 
 //-- GET Request handling --//
 /**
@@ -389,7 +412,7 @@ router.get("/:id/image/:sequence", (req, res) => {
 /**
  * Deletes a product with a specific id
  */
-router.delete("/:id", (req, res) => {
+router.delete("/:id", [isLoggedInMiddleware, isAdminMiddleware], (req, res) => {
     //Get the id supplied in the request parameter
     let productid = req.params.id;
     //Deletes the product with the product id
@@ -407,4 +430,4 @@ router.delete("/:id", (req, res) => {
 });
 
 //Export routes
-module.exports = router
+module.exports = router;

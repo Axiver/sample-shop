@@ -9,12 +9,15 @@ const router = express.Router();
 //Models
 const Promotion = require("../models/Promotion");
 
+//Middlewares
+const isLoggedInMiddleware = require("../auth/isLoggedInMiddleware");
+const isAdminMiddleware = require("../auth/isAdminMiddleware");
 
 //-- POST Request handling --//
 /**
  * Creates a new promotional period
  */
-router.post("/", (req, res) => {
+router.post("/", [isLoggedInMiddleware, isAdminMiddleware], (req, res) => {
     //Run the array through input sanitation
     trimObject(req.body, (err, result) => {
         //Check if there was an error
@@ -79,7 +82,7 @@ router.get("/product/:id", (req, res) => {
 /**
  * Deletes a promotion with a specific id
  */
-router.delete("/:id", (req, res) => {
+router.delete("/:id", [isLoggedInMiddleware, isAdminMiddleware], (req, res) => {
     //Get the id supplied in the request parameter
     let promoid = req.params.id;
     //Deletes the promotion with the promo id

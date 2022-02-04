@@ -39,7 +39,7 @@ $(document).ready(async () => {
                 let currProduct = data[i];
 
                 //Render the product card
-                const result = await Product.render.productCard(currProduct.productid, currProduct.name, currProduct.price);
+                const result = await Product.render.product.card(currProduct.productid, currProduct.name, currProduct.price);
 
                 //Append to html view
                 $("#featured-items").append(result);
@@ -68,7 +68,7 @@ $(document).ready(async () => {
                 const categoryName = category.category;
 
                 //Perform a GET request to the server to retrieve all products under the current category
-                await Product.query.byCategory(category.categoryid, async (response) => {
+                await Product.query.by.category(category.categoryid, async (response) => {
                     //Check if any data was returned
                     const products = response.data;
                     
@@ -83,7 +83,7 @@ $(document).ready(async () => {
                             const product = products[j];
                             
                             //Render the product card
-                            const productCard = await Product.render.productCard(product.productid, product.name, product.price);
+                            const productCard = await Product.render.product.card(product.productid, product.name, product.price);
 
                             //Append to html view
                             $(`#${categoryName.replace(" ", "_")}-content`).append(productCard);
