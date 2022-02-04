@@ -73,13 +73,11 @@ const User = {
      * @param {string} userData.email The email address
      * @param {string} userData.contact The contact number
      * @param {string} userData.password The password
-     * @param {string} userData.type The type of account the user account is
-     * @param {string} userData.profile_pic_url The url of the profile picture
      * @param {{(err: null | any, result: null | object): void}} callback The callback to invoke once the operation is completed
      */
     createUser: (userData, callback) => {
         //Deconstruct the userData object
-        ({username, email, contact, password, type, profile_pic_url} = userData);
+        ({username, email, contact, password, type} = userData);
         
         //Validates the email to check if the format supplied is valid
         if (validateEmail(email)) {
@@ -101,8 +99,8 @@ const User = {
                         } else {
                             //There was no error
                             //Proceed with SQL query
-                            const sqlQuery = "INSERT INTO users (username, email, contact, password, type, profile_pic_url) VALUES (?, ?, ?, ?, ?, ?)";
-                            dbConn.query(sqlQuery, [username, email, contact, hash, type, profile_pic_url], (err, results) => {
+                            const sqlQuery = "INSERT INTO users (username, email, contact, password) VALUES (?, ?, ?, ?)";
+                            dbConn.query(sqlQuery, [username, email, contact, hash], (err, results) => {
                                 //Closes the db connection
                                 dbConn.end();
                                 //Checks if there was an error
@@ -198,7 +196,7 @@ const User = {
      * @param {string} userData.profile_pic_url The url of the profile picture
      * @param {{(err: null | any, result: null | object): void}} callback The callback to invoke once the operation is completed
      */
-     updateUser: (userid, userData, callback) => {
+    updateUser: (userid, userData, callback) => {
         //Deconstruct the userData object
         ({username, email, contact, password, type, profile_pic_url} = userData);
         //Validates the email to check if the format supplied is valid
@@ -242,6 +240,9 @@ const User = {
             //The email is invalid
             return callback("Invalid email", null);
         }
+    },
+    authenticate: () => {
+        
     }
 }
 

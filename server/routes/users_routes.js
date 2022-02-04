@@ -15,13 +15,13 @@ const User = require("../models/User");
  * @param {{}} object The object containing properties to be trimmed
  * @param {*} callback The callback to invoke once the operation is completed
  */
- function trimObject(object, callback) {
+function trimObject(object, callback) {
     //Try to trim all the properties in a object
     try {
         //Loops through the object
-        for (let i = 0; i < object.length; i++) {
+        for (const [key, value] of Object.entries(object)) {
             //Trim the current index in the object
-            object[i] = object[i].trim();
+            object[key] = `${value}`.trim();
         }
 
         //The object has been trimmed, invoke the callback with the result
