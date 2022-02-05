@@ -15,16 +15,28 @@ app.get("/product/:productid", (req, res) => {
   	res.sendFile("/public/views/product.html", { root: __dirname });
 });
 
+app.get("/search/", (req, res) => {
+	res.sendFile("/public/views/search.html", { root: __dirname });
+});
+
+app.get("/admin/", (req, res) => {
+	res.sendFile("/public/views/admin.html", { root: __dirname });
+});
+
+app.get("/settings/", (req, res) => {
+	res.sendFile("/public/views/settings.html", { root: __dirname });
+});
+
 app.get("/login/", (req, res) => {
   	res.sendFile("/public/views/login.html", { root: __dirname });
 });
 
-app.get("/register/", (req, res) => {
-  	res.sendFile("/public/views/register.html", { root: __dirname });
+app.get("/logout/", (req, res) => {
+	res.sendFile("/public/views/logout.html", { root: __dirname });
 });
 
-app.get("/forgot_password/", (req, res) => {
- 	 res.sendFile("/public/views/forgot_password.html", { root: __dirname });
+app.get("/register/", (req, res) => {
+  	res.sendFile("/public/views/register.html", { root: __dirname });
 });
 
 const PORT = 3001;

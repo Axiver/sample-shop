@@ -23,40 +23,6 @@ const navbar = {
 							<li class="nav-item">
 								<a class="nav-link text-gray-600 fs-5 ${(page == "shop") ? "disabled" : null}" href="/shop">Shop</a>
 							</li>
-							<li class="nav-item">
-								<a class="nav-link text-gray-600 fs-5" href="#">Link</a>
-							</li>
-							${
-								(page == "login" || page == "register")
-								? 
-									`
-										<!-- Nav Item - Search Dropdown (Visible Only XS) -->
-										<li class="nav-item dropdown no-arrow d-sm-none">
-											<a class="nav-link dropdown-toggle" href="#" id="searchDropdown" role="button"
-												data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-												<i class="fas fa-search fa-fw"></i>
-											</a>
-											<!-- Dropdown - Messages -->
-											<div class="dropdown-menu dropdown-menu-right p-3 shadow animated--grow-in"
-												aria-labelledby="searchDropdown">
-												<form class="form-inline mr-auto w-100 navbar-search">
-													<div class="input-group">
-														<input type="text" class="form-control bg-light border-0 small"
-															placeholder="Search for..." aria-label="Search"
-															aria-describedby="basic-addon2">
-														<div class="input-group-append">
-															<button class="btn btn-primary" type="button">
-																<i class="fas fa-search fa-sm"></i>
-															</button>
-														</div>
-													</div>
-												</form>
-											</div>
-										</li>
-									`
-								:
-									""
-							}
 						</ul>
 				`
 			)
@@ -64,28 +30,33 @@ const navbar = {
 		/**
 		 * Renders the search bar
 		 * @param {string} page The page the user is currently on
+		 * @param {[]} categories An array of categories available for the user to select
 		 * @returns The rendered component
 		 */
-		renderSearchBar: (page) => {
-			if (page != "login" && page != "register") {
+		renderSearchBar: (page, categories) => {
+			if (page != "login" && page != "register" && page != "logout") {
+				//Loop through the categories array
+				let categoryOptions = "";
+				for (let i = 0; i < categories.length; i++) {
+					//Render the category at the current index
+					categoryOptions += `<option value="${categories[i].category}">${categories[i].category}</option>`;
+				}
+
+				//Return the element
 				return (
 					`
-					<form class="d-none d-sm-inline-block form-inline w-50 navbar-search">
+					<form class="d-none d-sm-inline-block form-inline w-50 navbar-search" action="/search" method="GET">
 						<div class="input-group">
 							<div class="dropdown me-4">
-								<button class="btn btn-secondary dropdown-toggle" type="button" id="dropdownMenuButton1" data-bs-toggle="dropdown" aria-expanded="false">
-									Category
-								</button>
-								<ul class="dropdown-menu" aria-labelledby="dropdownMenuButton1">
-									<li><a class="dropdown-item" href="#">Action</a></li>
-									<li><a class="dropdown-item" href="#">Another action</a></li>
-									<li><a class="dropdown-item" href="#">Something else here</a></li>
-								</ul>
+								<select class="form-select" aria-label="category select" name="category">
+									<option value="" selected>Category</option>
+									${categoryOptions}
+								</select>
 							</div>
 							<input type="text" class="form-control bg-light border-0 small" placeholder="Search for an item"
-								aria-label="Search" aria-describedby="basic-addon2">
+								aria-label="Search" aria-describedby="basic-addon2" name="searchterms">
 							<div class="input-group-append">
-								<button class="btn btn-primary" type="button">
+								<button class="btn btn-primary">
 									<i class="fas fa-search"></i>
 								</button>
 							</div>
@@ -100,79 +71,115 @@ const navbar = {
 		/**
 		 * Renders the user information
 		 * @param {string} page The page the user is currently on
+		 * @param {string} username Username
+		 * @param {string} profilepic URL to the profile pic of the user
+		 * @param {string} accountType The account type
 		 * @returns The rendered component
 		 */
-		userInformation: (page) => {
-			if (page != "login" && page != "register") {
+		userInformation: (page, username, profilepic, accountType) => {
+			//Checks if we are not at the login or registration page
+			if (page != "login" && page != "register" && page != "logout") {
+				//We are not
+				//Check if the user is logged in
+				if (username && profilepic) {
+					return (
+						`
+						<div class="nav-item dropdown no-arrow">
+							<a class="nav-link dropdown-toggle" href="#" id="userDropdown" role="button"
+								data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+								<span class="me-2 d-none d-lg-inline text-gray-600">${username}</span>
+								<img class="img-profile rounded-circle" src="${User.parseProfilePicUrl(profilepic)}">
+							</a>
+							<!-- Dropdown - User Information -->
+							<div class="dropdown-menu dropdown-menu-end shadow animated--grow-in"
+								aria-labelledby="userDropdown">
+								${
+									(accountType == "Admin") ? 
+										`
+										<a class="dropdown-item" href="/admin">
+											<i class="fas fa-gear-wide-connected me-2 text-gray-400"></i>
+											Admin Panel
+										</a>
+										`
+									:
+										""
+								}
+								<a class="dropdown-item" href="/settings">
+									<i class="fas fa-gear-wide-connected me-2 text-gray-400"></i>
+									Settings
+								</a>
+								<div class="dropdown-divider"></div>
+								<a class="dropdown-item" href="/logout" data-toggle="modal" data-target="#logoutModal">
+									<i class="fas fa-box-arrow-right me-2 text-gray-400"></i>
+									Logout
+								</a>
+							</div>
+						</div>
+						`
+					);
+				} else {
+					//The user is not logged in
+					return (
+						`
+							<div class="nav-item">
+								<a class="btn btn-outline-success me-0 me-lg-4" href="/login">Login</a>
+							</div>
+						`
+					);
+				}
+			} else {
+				//The user is on the login page
 				return (
 					`
-					<div class="nav-item dropdown no-arrow">
-						<a class="nav-link dropdown-toggle" href="#" id="userDropdown" role="button"
-							data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-							<span class="me-2 d-none d-lg-inline text-gray-600">Douglas McGee</span>
-							<img class="img-profile rounded-circle"
-								src="../assets/img/undraw_profile.svg">
-						</a>
-						<!-- Dropdown - User Information -->
-						<div class="dropdown-menu dropdown-menu-right shadow animated--grow-in"
-							aria-labelledby="userDropdown">
-							<a class="dropdown-item" href="#">
-								<i class="fas fa-person-fill me-2 text-gray-400"></i>
-								Profile
-							</a>
-							<a class="dropdown-item" href="#">
-								<i class="fas fa-gear-wide-connected me-2 text-gray-400"></i>
-								Settings
-							</a>
-							<div class="dropdown-divider"></div>
-							<a class="dropdown-item" href="#" data-toggle="modal" data-target="#logoutModal">
-								<i class="fas fa-box-arrow-right me-2 text-gray-400"></i>
-								Logout
-							</a>
+						<div class="nav-item">
+							<a class="btn btn-outline-success me-0 me-lg-4" href="/login">Login</a>
 						</div>
-					</div>
 					`
 				);
-			} else {
-				return "";
 			}
 		}
 	},
 	/**
 	 * Renders a navbar component
 	 * @param {string} page The page the user is currently on
+	 * @param {[]} categories An array of categories available for the user to select from
 	 */
-	render: (page) => {
-		//Return the rendered component
-		return (
-			`
-			<!-- Navbar -->
-			<nav class="navbar navbar-expand-sm navbar-light bg-white topbar py-0 ${(page == "product" || page == "login" || page == "register") ? "shadow" : null}">
-				<div class="container-fluid">
-					<!-- Branding -->
-					<a class="navbar-brand font-weight-bold ms-3 float-start" href="/">
-						<img class="align-text-bottom" src="../assets/img/sp_logo.jpg" width="30" height="30" class="d-inline-block align-top" alt="">
-						<span class="h4">IT!</span>
-					</a>
-	
-					<button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNavigation" aria-controls="navbarNavigation" aria-expanded="false" aria-label="Toggle navigation">
-						<span class="navbar-toggler-icon"></span>
-					</button>
-	
-					<!-- Topbar Navbar -->
-					<div class="collapse navbar-collapse justify-content-between" id="navbarNavigation">
-						${navbar.prviate.navigationButtons(page)}
-	
-						<!-- Nav Item - Search Bar -->
-						${navbar.prviate.renderSearchBar(page)}
-	
-						<!-- Nav Item - User Information -->
-						${navbar.prviate.userInformation(page)}
-					</div>
-				</div>
-			</nav>
-			<!-- End of Navbar -->
-			`
-		)
+	render: (page, categories) => {
+		return new Promise(async (resolve, reject) => {
+			//Get user session info
+			User.retrieveSessionData((data) => {
+				//Return the rendered component
+				resolve (
+					`
+					<!-- Navbar -->
+					<nav class="navbar navbar-expand-sm navbar-light bg-white topbar py-0 ${(page != "landing" && page != "shop") ? "shadow" : null}">
+						<div class="container-fluid">
+							<!-- Branding -->
+							<a class="navbar-brand font-weight-bold ms-3 float-start" href="/">
+								<img class="align-text-bottom" src="../assets/img/sp_logo.jpg" width="30" height="30" class="d-inline-block align-top" alt="">
+								<span class="h4">IT!</span>
+							</a>
+			
+							<button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNavigation" aria-controls="navbarNavigation" aria-expanded="false" aria-label="Toggle navigation">
+								<span class="navbar-toggler-icon"></span>
+							</button>
+			
+							<!-- Topbar Navbar -->
+							<div class="collapse navbar-collapse justify-content-between" id="navbarNavigation">
+								${navbar.prviate.navigationButtons(page)}
+			
+								<!-- Nav Item - Search Bar -->
+								${navbar.prviate.renderSearchBar(page, categories)}
+			
+								<!-- Nav Item - User Information -->
+								${navbar.prviate.userInformation(page, data.username, data.profilepic, data.type)}
+							</div>
+						</div>
+					</nav>
+					<!-- End of Navbar -->
+					`
+				)
+			});
+		});
 	}
 }

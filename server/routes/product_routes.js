@@ -26,6 +26,29 @@ const upload = multer({
     }
 }).single("image");
 
+//-- Functions --//
+/**
+ * Trims all properties in a object
+ * @param {{}} object The object containing properties to be trimmed
+ * @param {*} callback The callback to invoke once the operation is completed
+ */
+ function trimObject(object, callback) {
+    //Try to trim all the properties in a object
+    try {
+        //Loops through the object
+        for (const [key, value] of Object.entries(object)) {
+            //Trim the current index in the object
+            object[key] = `${value}`.trim();
+        }
+
+        //The object has been trimmed, invoke the callback with the result
+        callback(null, object);
+    } catch (error) {
+        //There was an error while trying to perform trim(), most likely encountered a null value
+        callback(error, null);
+    }
+}
+
 
 //-- POST Request handling --//
 /**
@@ -215,10 +238,10 @@ router.get("/:id", (req, res) => {
 router.get("/sort/searchterms/:searchTerms", (req, res) => {
     //Get the search terms supplied in the request parameter
     let searchTerms = req.params.searchTerms;
-    console.log(searchTerms);
+;
     //Format the searchterms into an array
-    searchTerms = searchTerms.split(",");
-    console.log(searchTerms);
+    searchTerms = searchTerms.split(" ");
+
     //Retrieves products based on the search terms supplied
     Product.getProductBySearchTerms(searchTerms, (err, result) => {
         //Checks if there was an error
@@ -278,7 +301,7 @@ router.get("/sort/ratings/", (req, res) => {
 });
 
 /**
- * Retrieves products under a particular category
+ * Retrieves products under a particular category (id)
  */
 router.get("/filter/category/:categoryid", (req, res) => {
     //Retrieves the category id from the request url
@@ -304,7 +327,33 @@ router.get("/filter/category/:categoryid", (req, res) => {
 });
 
 /**
- * Retrieves all reviews for a product, including the username of the reviewer
+ * Retrieves products under a particular category (name)
+ */
+ router.get("/filter/category/name/:categoryname", (req, res) => {
+    //Retrieves the category name from the request url
+    const categoryname = req.params.categoryname;
+    //Retrieves products under a particular category
+    Product.getProductByCategoryName(categoryname, (err, result) => {
+        //Checks if there was an error
+        if (err) {
+            //There was an error
+            console.log(err);
+            return res.status(500).send();
+        } else {
+            //There was no error, check if any results were returned
+            if (result.length > 0) {
+                //There was at least 1 row returned
+                return res.status(200).send(result);
+            } else {
+                //No results were returned
+                return res.status(500).send();
+            }
+        }
+    });
+});
+
+/**
+ * Retrieves all reviews for a product, including the username of the reviewer (sorted by date)
  */
 router.get("/:id/reviews", (req, res) => {
     //Get the product id supplied in the request parameter
@@ -319,6 +368,36 @@ router.get("/:id/reviews", (req, res) => {
         } else {
             //There was no error, check if any results were returned
             if (result.length > 0) {
+                //There was at least 1 row returned
+                return res.status(200).send(result);
+            } else {
+                //No results were returned
+                return res.status(500).send();
+            }
+        }
+    });
+});
+
+/**
+ * Retrieves a specific review for a product, including the username of the reviewer
+ */
+ router.get("/:productid/review/:reviewid", (req, res) => {
+    //Get the product id supplied in the request parameter
+    let productid = req.params.productid;
+
+    //Get the review id supplied in the request parameter
+    let reviewid = req.params.reviewid;
+
+    //Retrieves the review
+    Product.getReview(productid, reviewid, (err, result) => {
+        //Checks if there was an error
+        if (err) {
+            //There was an error
+            console.log(err);
+            return res.status(500).send();
+        } else {
+            //There was no error, check if any results were returned
+            if (result) {
                 //There was at least 1 row returned
                 return res.status(200).send(result);
             } else {

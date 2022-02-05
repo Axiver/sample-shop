@@ -191,51 +191,104 @@ const User = {
      * @param {string} userData.username The username
      * @param {string} userData.email The email address
      * @param {string} userData.contact The contact number
+     * @param {string} userData.oldPassword The old password
      * @param {string} userData.password The password
-     * @param {string} userData.type The type of account the user account is
      * @param {string} userData.profile_pic_url The url of the profile picture
      * @param {{(err: null | any, result: null | object): void}} callback The callback to invoke once the operation is completed
      */
     updateUser: (userid, userData, callback) => {
         //Deconstruct the userData object
-        ({username, email, contact, password, type, profile_pic_url} = userData);
+        ({username, email, contact, oldPassword, password} = userData);
         //Validates the email to check if the format supplied is valid
         if (validateEmail(email)) {
             //The email is valid
-            //Hash the plaintext password supplied by the user
-            bcrypt.hash(password, 10, function(err, hash) {
-                //Check if there was an error
-                if (err) {
-                    //There was an error
-                    return callback(err, null);
-                } else {
-                    //There was no error
-                    //Establish a connection to the database
-                    connectDB((err, dbConn) => {
-                        //Checks if there was an error
-                        if (err) {
-                            //There was an error
-                            return callback(err, null);
-                        } else {
-                            //There was no error
-                            //Proceed with SQL query
-                            const sqlQuery = "UPDATE users SET username = ?, email = ?, contact = ?, password = ?, type = ?, profile_pic_url = ? WHERE userid = ?";
-                            dbConn.query(sqlQuery, [username, email, contact, hash, type, profile_pic_url, userid], (err, results) => {
-                                //Closes the db connection
-                                dbConn.end();
-                                //Checks if there was an error
-                                if (err) {
-                                    //There was an error
-                                    return callback(err, null);
+            //Check if the user wants to update their password
+            if (password) {
+                //The user wants to update their password
+                //Retrieve the user's old password
+                //Establish a connection to the database
+                connectDB((err, dbConn) => {
+                    //Checks if there was an error
+                    if (err) {
+                        //There was an error
+                        return callback(err, null);
+                    } else {
+                        //There was no error
+                        //Proceed with SQL query
+                        const sqlQuery = "SELECT password FROM users WHERE userid = ?";
+                        dbConn.query(sqlQuery, userid, (err, results) => {
+                            //Checks if there was an error
+                            if (err) {
+                                //There was an error
+                                return callback(err, null);
+                            } else {
+                                //There was no error, compare password hashes
+                                if (bcrypt.compareSync(oldPassword, results[0].password)) {
+                                    //Password matches, check if the new password is the same as the old password
+                                    if (!bcrypt.compareSync(password, results[0].password)) {
+                                        //New password is different, proceed to update user info
+                                        //Hash the plaintext password supplied by the user
+                                        bcrypt.hash(password, 10, (err, hash) => {
+                                            //Check if there was an error
+                                            if (err) {
+                                                //There was an error
+                                                return callback(err, null);
+                                            } else {
+                                                //There was no error
+                                                //Proceed with SQL query
+                                                const sqlQuery = "UPDATE users SET username = ?, email = ?, contact = ?, password = ? WHERE userid = ?";
+                                                dbConn.query(sqlQuery, [username, email, contact, hash, userid], (err, results) => {
+                                                    //Closes the db connection
+                                                    dbConn.end();
+                                                    //Checks if there was an error
+                                                    if (err) {
+                                                        //There was an error
+                                                        return callback(err, null);
+                                                    } else {
+                                                        //There was no error, return the results
+                                                        return callback(null, results);
+                                                    }
+                                                });
+                                            }
+                                        });
+                                    } else {
+                                        //New password is the same as the old password, reject
+                                        return callback({"code": "same password"});
+                                    }
                                 } else {
-                                    //There was no error, return the results
-                                    return callback(null, results);
+                                    return callback({"code": "unauthorised"});
                                 }
-                            });
-                        }
-                    });
-                }
-            });
+                            }
+                        });
+                    }
+                });
+            } else {
+                //The user does not want to update their old password
+                //Establish a connection to the database
+                connectDB((err, dbConn) => {
+                    //Checks if there was an error
+                    if (err) {
+                        //There was an error
+                        return callback(err, null);
+                    } else {
+                        //There was no error
+                        //Proceed with SQL query
+                        const sqlQuery = "UPDATE users SET username = ?, email = ?, contact = ? WHERE userid = ?";
+                        dbConn.query(sqlQuery, [username, email, contact, userid], (err, results) => {
+                            //Closes the db connection
+                            dbConn.end();
+                            //Checks if there was an error
+                            if (err) {
+                                //There was an error
+                                return callback(err, null);
+                            } else {
+                                //There was no error, return the results
+                                return callback(null, results);
+                            }
+                        });
+                    }
+                });
+            }
         } else {
             //The email is invalid
             return callback("Invalid email", null);
@@ -258,7 +311,7 @@ const User = {
             } else {
                 //There was no error
                 //Proceed with SQL query
-                const sqlQuery = "SELECT password, userid FROM users WHERE email = ?";
+                const sqlQuery = "SELECT password, userid, username, type, profile_pic_url FROM users WHERE email = ?";
                 dbConn.query(sqlQuery, [email], (err, results) => {
                     //Closes the db connection
                     dbConn.end();
@@ -274,7 +327,7 @@ const User = {
                             //Verify the password
                             if (bcrypt.compareSync(password, account.password)) {
                                 //Password matches, return the userid
-                                return callback(null, account.userid);
+                                return callback(null, account);
                             }
                         }
 

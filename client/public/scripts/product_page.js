@@ -1,3 +1,6 @@
+//-- Global variables --//
+let previousStarRating = 0;
+
 //-- Functions --//
 function loadScript(url) {
     return new Promise((resolve, reject) => {
@@ -12,11 +15,17 @@ async function loadNavbar() {
     //Load required components
     await loadScript("/components/navbar.js");
 
-    //Render the navbar
-    const renderedNavbar = navbar.render("product");
+    //Perform a GET request to the server in order to retrieve a list of category names
+    Category.query.getAll(async (response) => {
+        //Get the data
+        const categories = response.data;
 
-    //Add it to the DOM
-    $("body").prepend(renderedNavbar);
+        //Render the navbar
+        const renderedNavbar = await navbar.render("product", categories);
+
+        //Add it to the DOM
+        $("body").prepend(renderedNavbar);
+    });
 }
 
 //Gets the id of the product the user is currently viewing
@@ -41,6 +50,51 @@ function getProductImage(productid, i) {
             //Resolve the promise
             resolve(result);
         });
+    });
+}
+
+//Disables the review input
+function disableReviewInput(reason) {
+    //Disable the review input
+    $("#userReview").attr("disabled", "disabled");
+    $("#submitReviewButton").attr("disabled", "disabled");
+    $("label > i").off("mouseenter");
+    $("label > i").off("mouseoff");
+    $("label > i").off("click");
+    $("label > i").removeClass("enabledRating");
+
+    //Display a reason
+    $("#reviewLabel").text(reason);
+
+    console.log("complete");
+}
+
+//Enables the review input
+function enableReviewInput() {
+    //The user is logged in, enable the textarea and button
+    $("#userReview").removeAttr("disabled");
+    $("#submitReviewButton").removeAttr("disabled");
+    $("label > i").addClass("enabledRating");
+
+    //Modify the label text
+    $("#reviewLabel").text("Review");
+
+    //Star rating hover handler
+    $("label > i").on("mouseenter", (e) => {
+        //Handle the hover event
+        RatingHandler.handlers.hoverHandler(e);
+    });
+
+    //Star rating mouse off handler
+    $("label > i").on("mouseout", (e) => {
+        //Handle the mouse off event
+        RatingHandler.handlers.mouseOffHandler(e, previousStarRating);
+    });
+
+    //Star rating on click handler
+    $("label > i").on("click", (e) => {
+        //Handle the click event
+        RatingHandler.handlers.click(e);
     });
 }
 
@@ -136,6 +190,80 @@ function renderProductInfo() {
     });
 }
 
+//Renders product reviews
+function renderProductReviews() {
+    //Get product id
+    const productid = getProductId();
+
+    //Retrieve reviews for the product
+    Product.query.reviews(productid, (reviews) => {
+        //Check if any data was returned
+        if (reviews) {
+            //There is at least 1 review, clear the reviews div
+            $("#reviews").empty();
+
+            //Loop through the reviews and render each one
+            for (let i = 0; i < reviews.length; i++) {
+                //Select the review at the current index
+                const review = reviews[i];
+                
+                //Format the time the review was created at
+                const createdDateSplit = review.created_at.split(" ")[0].split("-");
+                const createdDate = createdDateSplit[2] + "/" + createdDateSplit[1] + "/" + createdDateSplit[0];
+                const createdTime = review.created_at.split(" ")[1];
+
+                //Render the review
+                const renderedReview = (
+                    `
+                    <div class="col-12 p-4 mt-4 shadow rounded-3">
+                        <div class="row">
+                            <div class="col">
+                                <img height="100%" width="100%" class="img-profile rounded-circle d-inline-block" src="${User.parseProfilePicUrl(review.profile_pic_url)}">
+                                <h6 class="ms-2 d-inline-block">${review.username}</h6>
+                            </div>
+                            <div class="col">
+                                <p class="fs-6 text-end">${createdTime + " " + createdDate}</p>
+                            </div>
+                        </div>
+                        <div class="mt-2">
+                            ${Product.render.product.rating(review.rating)}
+                        </div>
+                        <div>
+                            <p>${review.review}</p>
+                        </div>
+                    </div>
+                    `
+                );
+
+                //Update the DOM
+                $("#reviews").append(renderedReview);
+
+                //Check if the reviewer is the currently logged in user
+                User.retrieveSessionData((userInfo) => {
+                    if (review.userid == userInfo.userid) {
+                        //Disable the review input
+                        disableReviewInput("You can only review this product once");
+                    }
+                });
+            }
+        }
+    });
+}
+
+//Checks whether or not the user is allowed to write reviews
+function checkReviewEligibility() {
+    //Checks whether or not the user is logged in
+    User.retrieveSessionData((data) => {
+        if (data) {
+            //Check if the input is disabled for other reasons
+            if ($("#reviewLabel").text() == "You need to login to write a review") {
+                //The input is not disabled for other reasons
+                enableReviewInput();
+            }
+        }
+    });
+}
+
 //Renders related products
 function renderRelatedProducts() {
     //Get product id
@@ -172,7 +300,7 @@ function renderRelatedProducts() {
                                 $("#recommended").addClass(["row-cols-2", "row-cols-md-3", "row-cols-xl-4"]);
 
                                 //Remove classes from the footer
-                                $("footer").removeClass(["position-absolute", "bottom-0", "container-fluid"]);
+                                $("footer").removeClass("container-fluid");
                             }
 
                             //This is a different product
@@ -189,21 +317,134 @@ function renderRelatedProducts() {
     });
 }
 
+//Submits a review
+function submitReview() {
+    //Verify review input
+    const validator = new Validator("#errorMessage");
+
+    //Verify the review input field
+    const review = validator.validate.review("#userReview");
+
+    //Check the outcome
+    if (!review) {
+        //The review input is not valid
+        return;
+    }
+
+    //Get the current rating
+    const ratingLabels = $("label > i");
+    let rating = 0;
+    for (let i = 0; i < ratingLabels.length; i++) {
+        //Check if the rating at the current index is selected
+        if (ratingLabels.eq(i).hasClass("fas")) {
+            rating++;
+        }
+    }
+
+    //Check if the rating is more than 0
+    if (rating == 0) {
+        //Invalid rating
+        $("#errorMessage").text("Rating cannot be 0");
+
+        return;
+    }
+
+    //Get product id
+    const productid = getProductId();
+
+    //All checks passed, review is valid. Submit the review.
+    //Retrieve session data
+    User.retrieveSessionData((sessionData) => {
+        //Submit the review
+        Product.create.review(sessionData.userid, productid, rating, review, sessionData.token,(err, response) => {
+            //Check if there was an error
+            if (!response.data) {
+                //There was an error
+                console.log(err);
+                
+                //Display an error message
+                $("#errorMessage").text("An error occured while trying to publish the review. Please try again later");
+                return;
+            }
+
+            //There was no error
+            //Clear the textarea input
+            $("#userReview").val("");
+
+            //Retrieve the new review from the database
+            Product.query.review(productid, response.data.reviewid, (review) => {
+                console.log(review);
+                //Render the review
+                const renderedReview = (
+                    `
+                    <div class="col-12 p-4 mt-4 shadow rounded-3">
+                        <div>
+                            <img height="100%" width="100%" class="img-profile rounded-circle d-inline-block" src="${User.parseProfilePicUrl(review.profile_pic_url)}">
+                            <h6 class="ms-2 d-inline-block">${review.username}</h6>
+                        </div>
+                        <div class="mt-2">
+                            ${Product.render.product.rating(review.rating)}
+                        </div>
+                        <div>
+                            <p>${review.review}</p>
+                        </div>
+                    </div>
+                    `
+                );
+
+                //Update the DOM
+                $("#reviews").append(renderedReview);
+
+                //Render a success text
+                $("#errorMessage").removeClass("text-danger").addClass("text-success");
+                $("#errorMessage").text("Review posted!");
+
+                //Reset review input
+                $("#userRating").text("0");
+                $("#userReview").removeClass("is-valid");
+
+                //Clear stars
+                for (let j = 0; j < ratingLabels.length; j++) {
+                    //Get the current label
+                    const currLabel = ratingLabels.eq(j);
+
+                    //Make it a outline
+                    currLabel.removeClass("fas");
+                    currLabel.addClass("far");
+                }
+
+                //Disable the review input
+                disableReviewInput("You can only review this product once");
+            });
+        });
+    });
+}
+
+
 //-- On document load --//
 $(document).ready(async () => {
     //Load required components
+    await loadScript("/scripts/Category.js");
     await loadScript("/scripts/Product.js");
-    
+	await loadScript("/scripts/User.js");
+    await loadScript("/scripts/InputValidation.js");
+    await loadScript("/scripts/RatingHandler.js");
+
+    //Load navbar
+    loadNavbar();
+
     //Product image
     renderProductImages();
 
     //Render product info
     renderProductInfo();
 
+    //Check if user is allowed to write reviews
+    checkReviewEligibility();
+
+    //Render product reviews
+    renderProductReviews();
+
     //Render related products
     renderRelatedProducts();
 });
-
-
-//Initialise components
-loadNavbar();

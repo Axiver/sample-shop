@@ -40,7 +40,7 @@ class Category {
                         <h3>${categoryName}</h3>
                     </div>
                     <div class="d-flex view-all-btn align-items-center">
-                        <a class="fs-5 text-reset text-decoration-none" href="#">View all</a>
+                        <a class="fs-5 text-reset text-decoration-none" href="/search/?category=${categoryName}">View all</a>
                         <i class="fas fa-chevron-right fs-5"></i>
                     </div>
                 </div>

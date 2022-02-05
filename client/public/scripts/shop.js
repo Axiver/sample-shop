@@ -12,11 +12,17 @@ async function loadNavbar() {
     //Load required components
     await loadScript("/components/navbar.js");
 
-    //Render the navbar
-    const renderedNavbar = navbar.render("shop");
+    //Perform a GET request to the server in order to retrieve a list of category names
+    Category.query.getAll(async (response) => {
+        //Get the data
+        const categories = response.data;
 
-    //Add it to the DOM
-    $("body").prepend(renderedNavbar);
+        //Render the navbar
+        const renderedNavbar = await navbar.render("shop", categories);
+
+        //Add it to the DOM
+        $("body").prepend(renderedNavbar);
+    });
 }
 
 //On document load
@@ -24,6 +30,10 @@ $(document).ready(async () => {
     //-- Load required scripts --//
     await loadScript("/scripts/Category.js");
     await loadScript("/scripts/Product.js");
+	await loadScript("/scripts/User.js");
+
+    //Load navbar
+    loadNavbar();
 
     //-- Featured Products --//
     //Perform a GET request to the server in order to retrieve the items with the best ratings
@@ -97,6 +107,3 @@ $(document).ready(async () => {
         }
     });
 });
-
-//Initialise components
-loadNavbar();

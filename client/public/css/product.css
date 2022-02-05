@@ -13,3 +13,17 @@
 #recommended img {
 	object-fit: cover;
 }
+
+/* Star Rating */
+.rating {
+	position: absolute;
+  	left: -9999px;
+}
+
+.enabledRating:hover {
+	cursor: pointer;
+}
+
+.rating:checked + label > i {
+ 	color: inherit;
+}

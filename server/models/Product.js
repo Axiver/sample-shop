@@ -145,7 +145,7 @@ const Product = {
                 //There was no error
                 //Proceed with SQL query
                 //Construct the query
-                let sqlQuery = "SELECT name, products.description, products.categoryid, categories.category, brand, price FROM products, categories WHERE categories.categoryid = products.categoryid";
+                let sqlQuery = "SELECT productid, name, products.description, products.categoryid, categories.category, brand, price FROM products, categories WHERE categories.categoryid = products.categoryid";
                 for (let i = 0; i < searchTerms.length; i++) {
                     sqlQuery += " AND name LIKE ?";
                 }
@@ -260,7 +260,7 @@ const Product = {
         });
     },
     /**
-     * Gets info of products under a particular category
+     * Gets info of products under a particular category (id)
      * @param {string} categoryid Id of the category
      * @param {{(err: null | any, result: null | object): void}} callback The callback to invoke once the operation is completed
      */
@@ -276,6 +276,37 @@ const Product = {
                 //Proceed with SQL query 
                 let sqlQuery = "SELECT productid, name, products.description, products.categoryid, brand, price FROM products WHERE products.categoryid = ?";
                 dbConn.query(sqlQuery, categoryid, (err, results) => {
+                    //Closes the db connection
+                    dbConn.end();
+                    //Checks if there was an error
+                    if (err) {
+                        //There was an error
+                        return callback(err, null);
+                    } else {
+                        //There was no error, return the results
+                        return callback(null, results);
+                    }
+                });
+            }
+        });
+    },
+    /**
+     * Gets info of products under a particular category (name)
+     * @param {string} categoryName Name of the category
+     * @param {{(err: null | any, result: null | object): void}} callback The callback to invoke once the operation is completed
+     */
+     getProductByCategoryName: (categoryName, callback) => {
+        //Establish a connection to the database
+        connectDB((err, dbConn) => {
+            //Checks if there was an error
+            if (err) {
+                //There was an error
+                return callback(err, null);
+            } else {
+                //There was no error
+                //Proceed with SQL query 
+                let sqlQuery = "SELECT productid, name, products.description, products.categoryid, brand, price FROM products, categories WHERE products.categoryid = categories.categoryid AND categories.category = ?";
+                dbConn.query(sqlQuery, categoryName, (err, results) => {
                     //Closes the db connection
                     dbConn.end();
                     //Checks if there was an error
@@ -359,7 +390,7 @@ const Product = {
         });
     },
     /**
-     * Gets all the reviews for a particular product
+     * Gets all the reviews for a particular product (sorted by date)
      * @param {number} productid The id of the product
      * @param {{(err: null | any, result: null | object): void}} callback The callback to invoke once the operation is completed
      */
@@ -373,7 +404,7 @@ const Product = {
             } else {
                 //There was no error
                 //Proceed with SQL query
-                const sqlQuery = "SELECT productid, reviews.userid, users.username, rating, review FROM reviews, users WHERE productid = ? AND users.userid = reviews.userid";
+                const sqlQuery = "SELECT productid, reviews.userid, users.username, users.profile_pic_url, rating, review, reviews.created_at FROM reviews, users WHERE productid = ? AND users.userid = reviews.userid ORDER BY reviews.created_at DESC";
                 dbConn.query(sqlQuery, [productid], (err, results) => {
                     //Closes the db connection
                     dbConn.end();
@@ -384,6 +415,38 @@ const Product = {
                     } else {
                         //There was no error, return the results
                         return callback(null, results);
+                    }
+                });
+            }
+        });
+    },
+    /**
+     * Gets a specific review
+     * @param {number} productid The id of the product
+     * @param {number} reviewid The id of the review
+     * @param {{(err: null | any, result: null | object): void}} callback The callback to invoke once the operation is completed
+     */
+    getReview: (productid, reviewid, callback) => {
+        //Establish a connection to the database
+        connectDB((err, dbConn) => {
+            //Checks if there was an error
+            if (err) {
+                //There was an error
+                return callback(err, null);
+            } else {
+                //There was no error
+                //Proceed with SQL query
+                const sqlQuery = "SELECT productid, reviews.userid, users.username, users.profile_pic_url, rating, review, reviews.created_at FROM reviews, users WHERE productid = ? AND reviewid = ? AND users.userid = reviews.userid";
+                dbConn.query(sqlQuery, [productid, reviewid], (err, result) => {
+                    //Closes the db connection
+                    dbConn.end();
+                    //Checks if there was an error
+                    if (err) {
+                        //There was an error
+                        return callback(err, null);
+                    } else {
+                        //There was no error, return the result
+                        return callback(null, result[0]);
                     }
                 });
             }

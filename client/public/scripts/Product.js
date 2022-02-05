@@ -37,7 +37,7 @@ class Product {
      * @param {number} categoryid The id of the category
      * @param {()} callback Invoked when the operation is completed
      */
-    static _byCategory(categoryid, callback) {
+    static _byCategoryId(categoryid, callback) {
         return new Promise((resolve, reject) => {
             const reqUrl = Product.baseUrl + '/api/product/filter/category/' + categoryid;
             axios({
@@ -56,6 +56,32 @@ class Product {
                     callback({data: null});
                 resolve({data: null});
             });
+        });
+    }
+
+    /**
+     * Queries the server for all products within a certain category
+     * Has a timeout of 1000ms
+     * @param {string} categoryname The name of the category
+     * @param {()} callback Invoked when the operation is completed
+     */
+    static _byCategoryName(categoryname, callback) {
+        const reqUrl = Product.baseUrl + '/api/product/filter/category/name/' + categoryname;
+        axios({
+            method: 'get',
+            url: reqUrl,
+            timeout: 1000
+        }).then((response) => {
+            //Invoke callback with the response data
+            if (callback)
+                callback(response);
+            return response;
+        }).catch((err) => {
+            //Error encountered, return null
+            console.log("Error encountered querying for products with category name " + categoryname + ": ", err.message);
+            if (callback)
+                callback({data: null});
+            return({data: null});
         });
     }
 
@@ -84,6 +110,31 @@ class Product {
                     callback({data: null});
                 resolve({data: null});
             });
+        });
+    }
+
+    /**
+     * Queries the server for products matching the search term and category
+     * @param {string} searchTerms The search terms to match against
+     * @param {()} callback Invoked when the operation is completed
+     */
+    static _bySearchTerms(searchTerms, callback) {
+        const reqUrl = Product.baseUrl + '/api/product/sort/searchterms/' + searchTerms;
+        axios({
+            method: 'get',
+            url: reqUrl,
+            timeout: 1000
+        }).then((response) => {
+            //Invoke callback with the response data
+            if (callback)
+                callback(response);
+            return response;
+        }).catch((err) => {
+            //Error encountered, return null
+            console.log("Error encountered querying for products matching search terms: " + searchTerms, err.message);
+            if (callback)
+                callback({data: null});
+            return({data: null});
         });
     }
 
@@ -180,6 +231,88 @@ class Product {
         });
     }
 
+    /**
+     * Queries the reviews of a product
+     * @param {number} productid The id of the product to retrieve the reviews for
+     * @param {()} callback Invoked when the operation is completed 
+     */
+    static _reviews(productid, callback) {
+        //Get the reviews a product has
+        const reqUrl = Product.baseUrl + `/api/product/${productid}/reviews/`;
+        axios({
+            method: 'get',
+            url: reqUrl,
+            timeout: 1000
+        }).then((response) => {
+            //Return the result
+            if (callback)
+                callback(response.data);
+            return response.data;
+        }).catch((err) => {
+            //Error encountered, return null
+            if (callback)
+                callback(null);
+            return null;
+        });
+    }
+
+    /**
+     * Retrieves a review based on a product id and review id
+     * @param {number} productid The product id
+     * @param {number} reviewid The id of the review
+     * @param {()} callback Invoked when the operation is completed 
+     */
+    static _reviewById(productid, reviewid, callback) {
+        //Get a specific review of a product
+        const reqUrl = Product.baseUrl + `/api/product/${productid}/review/${reviewid}`;
+        axios({
+            method: 'get',
+            url: reqUrl,
+            timeout: 1000
+        }).then((response) => {
+            //Return the result
+            if (callback)
+                callback(response.data);
+            return response.data;
+        }).catch((err) => {
+            //Error encountered, return null
+            if (callback)
+                callback(null);
+            return null;
+        });
+    }
+
+    /**
+     * Creates a new review for a particular product
+     * @param {number} rating The rating of the product
+     * @param {string} review The review of the product
+     * @param {string} bearerToken Bearer token
+     * @param {()} callback Invoked when the operation is completed 
+     */
+    static _createReview(userid, productid, rating, review, bearerToken, callback) {
+        const reqUrl = User.baseUrl + `/api/product/${productid}/review`;
+        axios.post(reqUrl, {
+            userid: userid,
+            rating: rating,
+            review: review
+        },
+        {
+            headers: { 
+                "Authorization": "Bearer " + bearerToken 
+            }
+        }).then((response) => {
+            //Invoke callback with the response data
+            if (callback)
+                callback(null, response);
+            return;
+        }).catch((err) => {
+            //Error encountered, return the error message
+            if (callback)
+                callback(err);
+            return;
+        });
+    }
+
 
     //-- Render Methods --//
     static _productRating(avgRating) {
@@ -188,8 +321,7 @@ class Product {
             //The product has at least 1 review
             //Calculate the number of stars we need to render
             const filledStarsCount = Math.floor(avgRating);
-            const emptyStarsCount = Math.floor(5 - avgRating);
-            const partialStarCount = (avgRating - filledStarsCount) * 100;
+            const emptyStarsCount = 5 - filledStarsCount;
 
             //Render the stars
             let renderedStars = "";
@@ -199,11 +331,6 @@ class Product {
                 for (let i = 1; i <= filledStarsCount; i++) {
                     renderedStars += `<i class="fas fa-star"></i>`;
                 }
-            }
-
-            //Render partial star
-            if (partialStarCount > 0) {
-                renderedStars += `<span class="stacked-star"><i style="width: ${partialStarCount.toFixed(0)}%;" class="fa fa-star overflow-hidden"></i><i class="far fa-star"></i></span>`;
             }
 
             //Render empty star
@@ -398,15 +525,23 @@ class Product {
 
 
     //-- Expose Methods --//
+    static create = {
+        review: this._createReview
+    }
+
     static query = {
         featured: this._featured,
         by: {
-            category: this._byCategory,
-            id: this._byId
+            category: this._byCategoryId,
+            categoryName: this._byCategoryName,
+            id: this._byId,
+            searchTerms: this._bySearchTerms
         },
         image: this._image,
         imageCount: this._imageCount,
-        averageRating: this._averageRating
+        averageRating: this._averageRating,
+        reviews: this._reviews,
+        review: this._reviewById
     }
 
     static render = {

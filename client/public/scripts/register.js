@@ -17,7 +17,7 @@ async function loadNavbar() {
     await loadScript("/components/navbar.js");
 
     //Render the navbar
-    const renderedNavbar = navbar.render("register");
+    const renderedNavbar = await navbar.render("register");
 
     //Add it to the DOM
     $("body").prepend(renderedNavbar);
@@ -103,18 +103,18 @@ function formSubmit() {
 
 //-- On document ready --//
 $(document).ready(() => {
-    //Check if the user is already logged in
-    const token = localStorage.getItem("token");
+    //Initialise components
+    loadNavbar();
 
-    if (token) {
-        //The user is already logged in, redirect the user back to the shop page
-        window.location.href = "/shop";
-    }
+    //Check if the user is already logged in
+    User.retrieveSessionData((isLoggedIn) => {
+        if (isLoggedIn) {
+            //The user is already logged in, redirect the user back to the shop page
+            window.location.href = "/shop"; 
+        }
+    });
 });
 
 //Load required scripts
 loadScript("/scripts/InputValidation.js");
 loadScript("/scripts/User.js");
-
-//Initialise components
-loadNavbar();

@@ -117,7 +117,10 @@ router.post("/authenticate", (req, res) => {
                         //There was no error, send the JWT token and userid
                         res.status(200).send({
                             token: token,
-                            user_id: result.userid
+                            userid: result.userid,
+                            username: result.username,
+                            type: result.type,
+                            profilepic: result.profile_pic_url
                         });
                     });
                 }
@@ -176,7 +179,7 @@ router.get("/:id", (req, res) => {
 /**
  * Updates the information of a user account that matches a specific userid
  */
-router.put("/users/:id", isLoggedInMiddleware, (req, res) => {
+router.put("/:id", isLoggedInMiddleware, (req, res) => {
     //Get the id supplied in the request parameter
     let userid = req.params.id;
 
@@ -188,6 +191,7 @@ router.put("/users/:id", isLoggedInMiddleware, (req, res) => {
 
     //Trims the user input before passing it through to the updateUser method
     trimObject(req.body, (err, trimmedInput) => {
+        console.log("trimmedinput", trimmedInput);
         //Check if there was an error
         if (err) {
             //There was an error
@@ -202,8 +206,26 @@ router.put("/users/:id", isLoggedInMiddleware, (req, res) => {
                     console.log(err);
                     //Check if the error was due to a duplicate entry
                     if (err.code == "ER_DUP_ENTRY") {
-                        //Error was due to duplicate entry
-                        return res.status(422).send();
+                        //Error was caused by a duplicate entry. Check which column is affected
+                        let response = {};
+                        if (err.sqlMessage.includes("users.username")) {
+                            //Username is already in use
+                            response = {"message": "Username is already in use!", "affectedInputs": ["username"]};
+                        } else if (err.sqlMessage.includes("users.email")) {
+                            //Email is already in use
+                            response = {"message": "Email address is already registered!", "affectedInputs": ["email"]};
+                        }
+                        return res.status(422).send(response);
+                    //Check if error was due to password mismatch
+                    } else if (err.code == "unauthorised") {
+                        //Password mismatch
+                        let response = {"message": "Old password is invalid", "affectedInputs": ["oldPassword"]};
+                        return res.status(401).send(response);
+                    //Check if error was due to the new password being the same as the old password
+                    } else if (err.code == "same password") {
+                        //The password is the same
+                        let response = {"message": "New password cannot be the same as old password", "affectedInputs": ["password"]};
+                        return res.status(422).send(response);
                     } else {
                         //Unknown error occured
                         return res.status(500).send();

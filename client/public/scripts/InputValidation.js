@@ -51,6 +51,9 @@ class Validator {
         $(selector).removeClass("is-valid");
         $(selector).addClass("is-invalid");
 
+        //Add danger text
+        $(this.errorMessageSelector).removeClass("text-success").addClass("text-danger");
+
         //Set the error message
         $(this.errorMessageSelector).text(errorMessage);
 
@@ -79,6 +82,7 @@ class Validator {
         //Sets the state of the input field
         $(selector).removeClass("is-invalid");
         $(selector).addClass("is-valid");
+        $(selector).removeClass("text-danger");
 
         //Clear error message
         $(this.errorMessageSelector).text("");
@@ -214,12 +218,35 @@ class Validator {
         return isValid;
     }
 
+    /**
+     * Validates the review input
+     * @param {string} reviewSelector Jquery selector for the review input field
+     */
+    _validateReview = (reviewSelector) => {
+        //Validate the review input field
+        const isValid = this._validateInput(reviewSelector, (review) => {
+            //Ensure that the review field is not empty
+            if (review.length == 0) {
+                return "Review cannot be empty";
+            }
+
+            //Ensure that the review is at least 10 characters long
+            if (review.length < 10) {
+                return "Review must be at least 10 characters long";
+            }
+        });
+
+        //Return the outcome
+        return isValid;
+    }
+
     //Expose the methods
     validate = {
         username: this._validateUsername,
         contact: this._validateContact,
         email: this._validateEmail,
         password: this._validatePassword,
-        confirmPassword: this._validateConfirmPassword
+        confirmPassword: this._validateConfirmPassword,
+        review: this._validateReview
     }
 }
