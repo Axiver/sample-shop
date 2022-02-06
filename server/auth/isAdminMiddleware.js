@@ -27,7 +27,7 @@ const check = (req, res, next) => {
         }
 
         //There was no error, check if the account is an admin account
-        if (result.type != "admin") {
+        if (result[0].type != "Admin") {
             //User is not an admin account, this is unauthorised
             return res.status(401).send();
         }

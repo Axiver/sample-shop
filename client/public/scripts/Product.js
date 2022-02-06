@@ -313,6 +313,167 @@ class Product {
         });
     }
 
+    /**
+     * Creates a new product
+     * @param {string} productName The name of the product 
+     * @param {number} productPrice The price of the product
+     * @param {number} categoryid The id of the category of the product
+     * @param {string} productDescription The desciprtion of the product
+     * @param {string} productBrand The brand of the product
+     * @param {string} bearerToken Bearer token
+     * @param {()} callback Invoked when the operation is completed
+     */
+    static _createProduct(productName, productPrice, categoryid, productDescription, productBrand, bearerToken, callback) {
+        const reqUrl = User.baseUrl + `/api/product/`;
+        axios.post(reqUrl, {
+            name: productName,
+            description: productDescription,
+            categoryid: categoryid,
+            brand: productBrand,
+            price: productPrice
+        },
+        {
+            headers: { 
+                "Authorization": "Bearer " + bearerToken 
+            }
+        }).then((response) => {
+            //Invoke callback with the response data
+            if (callback)
+                callback(null, response);
+            return;
+        }).catch((err) => {
+            //Error encountered, return the error message
+            if (callback)
+                callback(err);
+            return;
+        });
+    }
+
+    /**
+     * Modifes an existing product
+     * @param {number} productid The id of the product
+     * @param {string} productName The name of the product 
+     * @param {number} productPrice The price of the product
+     * @param {number} categoryid The id of the category of the product
+     * @param {string} productDescription The desciprtion of the product
+     * @param {string} productBrand The brand of the product
+     * @param {string} bearerToken Bearer token
+     * @param {()} callback Invoked when the operation is completed
+     */
+     static _modifyProduct(productid, productName, productPrice, categoryid, productDescription, productBrand, bearerToken, callback) {
+        const reqUrl = User.baseUrl + `/api/product/` + productid;
+        axios.put(reqUrl, {
+            name: productName,
+            description: productDescription,
+            categoryid: categoryid,
+            brand: productBrand,
+            price: productPrice
+        },
+        {
+            headers: { 
+                "Authorization": "Bearer " + bearerToken 
+            }
+        }).then((response) => {
+            //Invoke callback with the response data
+            if (callback)
+                callback(null, response);
+            return;
+        }).catch((err) => {
+            //Error encountered, return the error message
+            if (callback)
+                callback(err);
+            return;
+        });
+    }
+
+    /**
+     * Uploads image for a product
+     * @param {number} productid The id of the product
+     * @param {object} image Image file to be uploaded
+     * @param {string} bearerToken Bearer token
+     * @param {()} callback Invoked when the operation is completed
+     */
+     static _createImage(productid, image, bearerToken, callback) {
+        return new Promise((resolve, reject) => {
+            const reqUrl = User.baseUrl + `/api/product/${productid}/image`;
+            //Construct payload
+            let payload = new FormData();
+            payload.append("image", image);
+            axios.post(reqUrl, payload,
+            {
+                headers: {
+                    'Content-Type': 'multipart/form-data',
+                    "Authorization": "Bearer " + bearerToken 
+                }
+            }).then((response) => {
+                //Invoke callback with the response data
+                if (callback)
+                    callback(null, response);
+                resolve();
+            }).catch((err) => {
+                //Error encountered, return the error message
+                if (callback)
+                    callback(err);
+                resolve();
+            });
+        });
+    }
+
+    /**
+     * Deletes a specific image of a product
+     * @param {number} productid The id of the product
+     * @param {number} imageid The id of the image
+     * @param {string} bearerToken Bearer token
+     * @param {()} callback Invoked when the operation is completed
+     */
+    static _deleteImage(productid, imageid, bearerToken, callback) {
+        return new Promise((resolve, reject) => {
+            const reqUrl = User.baseUrl + `/api/product/${productid}/image/${imageid}`;
+            //Construct payload
+            axios.delete(reqUrl,
+            {
+                headers: {
+                    "Authorization": "Bearer " + bearerToken 
+                }
+            }).then((response) => {
+                //Invoke callback with the response data
+                if (callback)
+                    callback(null, response);
+                resolve();
+            }).catch((err) => {
+                //Error encountered, return the error message
+                if (callback)
+                    callback(err);
+                resolve();
+            });
+        });
+    }
+
+    /**
+     * Retrieves every product in order of productid, starting from index
+     * @param {number} index Index to start from
+     * @param {()} callback Invoked upon completion
+     */
+    static _queryFromIndex(index, callback) {
+        //Get a specific review of a product
+        const reqUrl = Product.baseUrl + `/api/product/from/` + index;
+        axios({
+            method: 'get',
+            url: reqUrl,
+            timeout: 1000,
+        }).then((response) => {
+            //Return the result
+            if (callback)
+                callback(response.data);
+            return response.data;
+        }).catch((err) => {
+            //Error encountered, return null
+            if (callback)
+                callback(null);
+            return null;
+        });
+    }
+
 
     //-- Render Methods --//
     static _productRating(avgRating) {
@@ -321,7 +482,8 @@ class Product {
             //The product has at least 1 review
             //Calculate the number of stars we need to render
             const filledStarsCount = Math.floor(avgRating);
-            const emptyStarsCount = 5 - filledStarsCount;
+            const halfStarsCount = Math.floor((avgRating - filledStarsCount) / 0.5);
+            const emptyStarsCount = 5 - filledStarsCount - halfStarsCount;
 
             //Render the stars
             let renderedStars = "";
@@ -330,6 +492,13 @@ class Product {
             if (filledStarsCount > 0) {
                 for (let i = 1; i <= filledStarsCount; i++) {
                     renderedStars += `<i class="fas fa-star"></i>`;
+                }
+            }
+
+            //Render the half stars
+            if (halfStarsCount > 0) {
+                for (let j = 1; j <= emptyStarsCount; j++) {
+                    renderedStars += `<i class="fas fa-star-half"></i>`;
                 }
             }
 
@@ -492,13 +661,14 @@ class Product {
      * Renders a indicator to be used within a product's image carousel
      * @param {string} elementSelector Selector for the image carousel
      * @param {number} id The id of the carousel indicator
+     * @param {boolean} active Whether or not this indicator is active
      * @returns {string} Rendered component
      */
-    static _imageCarouselIndicator(elementSelector, id) {
+    static _imageCarouselIndicator(elementSelector, id, active) {
         //Return the component
         return (
             `
-                <button type="button" data-bs-target="${elementSelector}" data-bs-slide-to="${id}" class="${(id == 0) ? "active" : null}" aria-current="${(id == 0)}" aria-label="Slide ${id+1}"></button>
+                <button type="button" data-bs-target="${elementSelector}" data-bs-slide-to="${id}" class="${(id == 0 || active) ? "active" : ""}" aria-current="${(id == 0)}" aria-label="Slide ${id+1}"></button>
             `
         )
     }
@@ -507,18 +677,70 @@ class Product {
      * Renders a carousel slide to be used within a product's image carousel
      * @param {string} imageUrl A url to the image
      * @param {boolean} active Whether or not this is the active slide in the carousel
+     * @param {boolean} clientSide Whether or not the image is on the user's computer
+     * @param {number} imageId The id of the image
+     * @param {number} localimageid The local id of the image
      */
-    static _imageCarouselSlide(imageUrl, active) {
+    static _imageCarouselSlide(imageUrl, active, clientSide, imageId, localimageid) {
         //Format the product image url
-        let productImageUrl = Product.baseUrl + imageUrl;
+        let productImageUrl = imageUrl;
+        
+        //Checks if the image is on the user's computer
+        if (!clientSide) {
+            productImageUrl = Product.baseUrl + imageUrl;
+        }
+
+        //Checks if a image url was supplied
         if (imageUrl == null)
             productImageUrl = "/assets/img/default.png";
+
         //Return the component
         return (
             `
-                <div class="carousel-item ${active ? "active" : null}">
+                <div class="carousel-item ${active ? "active" : ""}" ${imageId ? `data-imageid="${imageId}"` : ""} ${(localimageid != null) ? `data-localimageid="${localimageid}"` : ""}>
                     <img height="100%" width="100%" class="d-block w-100" src="${productImageUrl}" />
                 </div>
+            `
+        )
+    }
+
+    /**
+     * Renders a table row
+     * @param {number} rownumber The id of the current row being rendered
+     * @param {number} productid The id of the product 
+     * @param {string} productName The name of the product
+     * @param {string} productDescription The description of the product
+     * @param {string} categoryName The name of the product
+     * @param {string} brand The brand of the product
+     * @param {number} price The price of the product
+     * @param {number} upcomingDiscounts Number of upcoming discounts for the product
+     * @returns Rendered component
+     */
+    static _renderTableRow(rownumber, productid, productName, productDescription, categoryName, brand, price, upcomingDiscounts) {
+        //Formats the product name
+        if (productName.length > 40) {
+             //Cut the name short
+            productName = productName.substring(0, 39).trim() + "...";
+        }
+
+        //Formats the product description
+        if (productDescription.length > 50) {
+            //Cut the description short
+            productDescription = productDescription.substring(0, 49).trim() + "...";
+        }
+        //Return the component
+        return (
+            `
+            <tr class="text-center">
+                <th class="align-middle" scope="row">${rownumber}</th>
+                <td class="align-middle text-start">${productName}</td>
+                <td class="align-middle text-start">${productDescription}</td>
+                <td class="align-middle text-start">${categoryName}</td>
+                <td class="align-middle">${brand}</td>
+                <td class="align-middle">$${price.toFixed(2)}</td>
+                <td class="align-middle">${upcomingDiscounts}</td>
+                <td class="align-middle text-end px-3"><a class="btn btn-primary rounded-pill px-4" href="/admin/edit/product/?productid=${productid}">Edit</a></td>
+            </tr>
             `
         )
     }
@@ -526,10 +748,21 @@ class Product {
 
     //-- Expose Methods --//
     static create = {
-        review: this._createReview
+        review: this._createReview,
+        product: this._createProduct,
+        image: this._createImage
+    }
+
+    static modify = {
+        product: this._modifyProduct
+    }
+
+    static delete = {
+        image: this._deleteImage
     }
 
     static query = {
+        fromIndex: this._queryFromIndex,
         featured: this._featured,
         by: {
             category: this._byCategoryId,
@@ -553,6 +786,9 @@ class Product {
         carousel: {
             imageIndicator: this._imageCarouselIndicator,
             imageSlide: this._imageCarouselSlide
+        },
+        table: {
+            row: this._renderTableRow
         }
     }
 }

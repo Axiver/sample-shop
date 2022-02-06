@@ -14,13 +14,20 @@ class Validator {
      * Validates a input field
      * @param {string} selector Selector to the input field
      * @param {()} validator Validator function
+     * @param {any} rawData Data to validate
      */
-    _validateInput = (selector, validator) => {
+    _validateInput = (selector, validator, rawData) => {
         //Get value of the input field
-        const inputValue = $(selector).val().trim();
+        let inputValue = $(selector).val();
+
+        if (inputValue)
+            inputValue = inputValue.trim();
+
+        if (rawData) 
+            inputValue = rawData;
 
         //Run the validator function
-        const error = validator(inputValue);
+        const error = validator(inputValue, $(selector));
 
         //Check if the input is valid
         if (error) {
@@ -28,7 +35,7 @@ class Validator {
             //Mark the input as invalid
             this._setInvalid(selector, error, () => {
                 //Revalidator function
-                this._validateInput(selector, validator);
+                this._validateInput(selector, validator, rawData);
             });
 
             //Return false
@@ -48,8 +55,14 @@ class Validator {
      */
     _setInvalid = (selector, errorMessage, revalidate) => {
         //Set the state of the input field
-        $(selector).removeClass("is-valid");
-        $(selector).addClass("is-invalid");
+        if ($(selector).hasClass("form-control")) {
+            //Input supports bootstrap input validation styling
+            $(selector).removeClass("is-valid");
+            $(selector).addClass("is-invalid");
+        } else {
+            $(selector).removeClass("border-success");
+            $(selector).addClass("border-danger");
+        }
 
         //Add danger text
         $(this.errorMessageSelector).removeClass("text-success").addClass("text-danger");
@@ -80,9 +93,15 @@ class Validator {
      */
     _setValid = (selector) => {
         //Sets the state of the input field
-        $(selector).removeClass("is-invalid");
-        $(selector).addClass("is-valid");
-        $(selector).removeClass("text-danger");
+        if ($(selector).hasClass("form-control")) {
+            //Input supports bootstrap input validation styling
+            $(selector).removeClass("is-invalid");
+            $(selector).addClass("is-valid");
+            $(selector).removeClass("text-danger");
+        } else {
+            $(selector).removeClass("border-danger");
+            $(selector).addClass("border-success");
+        }
 
         //Clear error message
         $(this.errorMessageSelector).text("");
@@ -240,6 +259,191 @@ class Validator {
         return isValid;
     }
 
+    /**
+     * Validates the file input
+     * @param {string} fileSelector Jquery selector for the file input field
+     */
+    _validateFileInput = (fileSelector) => {
+        //Validate the file input field
+        const isValid = this._validateInput(fileSelector, (file, jquerySelector) => {
+            //Ensure that the file field is not empty
+            if (file.length == 0) {
+                return "Please select a file";
+            }
+
+            //Ensure that the file extension is of a acceptable type
+            const fileExt = file.split(".").at(-1);
+            if (fileExt != "png" && fileExt != "jpg" && fileExt != "jpeg") {
+                return "Filetype must be either a .png, .jpg or a .jpeg";
+            }
+
+            //Ensure that the file size is no larger than 1MB
+            if (jquerySelector[0].files[0].size > 1000000) {
+                return "File size must not exceed 1MB";
+            }
+        });
+
+        //Return the outcome
+        return isValid;
+    }
+
+    /**
+     * Validates product name
+     * @param {string} selector JQuery selector for the product name input field
+     */
+    _validateProductName = (selector) => {
+        //Validate the product name input field
+        const isValid = this._validateInput(selector, (productName) => {
+            //Ensure that the product name is not empty
+            if (productName.length == 0) {
+                return "Product name cannot be empty";
+            }
+
+            //Ensure that the product name is at least 6 characters long
+            if (productName.length < 6) {
+                return "Product name must be at least 6 characters long";
+            }
+        });
+
+        //Return the outcome
+        return isValid;
+    }
+
+    /**
+     * Validates product price
+     * @param {string} selector JQuery selector for the product price input field
+     */
+    _validateProductPrice = (selector) => {
+        //Validate the product price input field
+        const isValid = this._validateInput(selector, (productPrice) => {
+            //Ensure that the product price is not empty
+            if (productPrice.length == 0) {
+                return "Product price cannot be empty";
+            }
+
+            //Ensure that the product price is a number
+            if (isNaN(productPrice)) {
+                return "Product price must be a valid number";
+            }
+
+            //Ensure that the product price is more than 0
+            if (productPrice <= 0) {
+                return "Product price must be more than 0";
+            }
+        });
+
+        //Return the outcome
+        return isValid;
+    }
+
+    /**
+     * Validates product category
+     * @param {string} selector JQuery selector for the product category input field
+     */
+     _validateProductCategory = (selector) => {
+        //Validate the product category input field
+        const isValid = this._validateInput(selector, (productCategory, jquerySelector) => {
+            const selectedCategory = jquerySelector.find("option:selected").eq(0);
+            //Ensure that the product category is not empty
+            if (selectedCategory.attr("data-categoryid") == null) {
+                return "Please select a category";
+            }
+        });
+
+        //Return the outcome
+        return isValid;
+    }
+
+    /**
+     * Validates product description
+     * @param {string} selector JQuery selector for the product description input field
+     */
+     _validateProductDescription = (selector) => {
+        //Validate the product description input field
+        const isValid = this._validateInput(selector, (productDescription) => {
+            //Ensure that the product description is not empty
+            if (productDescription.length == 0) {
+                return "Product description cannot be empty";
+            }
+        });
+
+        //Return the outcome
+        return isValid;
+    }
+
+    /**
+     * Validates product brand
+     * @param {string} selector Jquery selector for the product brand
+     */
+    _validateProductBrand = (selector) => {
+        //Validate the product brand input field
+        const isValid = this._validateInput(selector, (productBrand) => {
+            //Ensure that the product brand is not empty
+            if (productBrand.length == 0) {
+                return "Product brand cannot be empty";
+            }
+        });
+
+        //Return the outcome
+        return isValid;
+    }
+
+    /**
+     * Validates product images
+     * @param {string} selector Jquery selector for the product image input
+     * @param {[]} productImages An array containing all product images uploaded
+     */
+    _validateProductImages = (selector, productImages) => {
+        //Validate the product images array
+        const isValid = this._validateInput(selector, (productImages) => {
+            //Ensure that the product images array is not empty
+            if (productImages.length == 0) {
+                return "Product must have at least 1 image";
+            }
+
+            if (productImages.length == 1 && productImages.eq(0).find("img").attr("src").endsWith("/assets/img/blank.png")) {
+                return "Product must have at least 1 image";
+            }
+        }, productImages);
+
+        //Return the outcome
+        return isValid;
+    }
+
+    /**
+     * Validates category name
+     * @param {string} selector Jquery selector for the category name input
+     */
+    _validateCategoryName = (selector) => {
+        //Validate the category name input field
+        const isValid = this._validateInput(selector, (categoryName) => {
+            //Ensure that the category name is not empty
+            if (categoryName.length == 0) {
+                return "Category name cannot be empty";
+            }
+        });
+
+        //Return the outcome
+        return isValid;
+    }
+
+    /**
+     * Validates category description
+     * @param {string} selector Jquery selector for the category description input
+     */
+     _validateCategoryDescription = (selector) => {
+        //Validate the category description input field
+        const isValid = this._validateInput(selector, (categoryDescription) => {
+            //Ensure that the category description is not empty
+            if (categoryDescription.length == 0) {
+                return "Category description cannot be empty";
+            }
+        });
+
+        //Return the outcome
+        return isValid;
+    }
+
     //Expose the methods
     validate = {
         username: this._validateUsername,
@@ -247,6 +451,19 @@ class Validator {
         email: this._validateEmail,
         password: this._validatePassword,
         confirmPassword: this._validateConfirmPassword,
-        review: this._validateReview
+        review: this._validateReview,
+        fileInput: this._validateFileInput,
+        product: {
+            name: this._validateProductName,
+            price: this._validateProductPrice,
+            category: this._validateProductCategory,
+            description: this._validateProductDescription,
+            brand: this._validateProductBrand,
+            images: this._validateProductImages
+        },
+        category: {
+            name: this._validateCategoryName,
+            description: this._validateCategoryDescription
+        }
     }
 }

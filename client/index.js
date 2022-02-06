@@ -23,6 +23,22 @@ app.get("/admin/", (req, res) => {
 	res.sendFile("/public/views/admin.html", { root: __dirname });
 });
 
+app.get("/admin/edit/product/", (req, res) => {
+	res.sendFile("/public/views/editProduct.html", { root: __dirname });
+});
+
+app.get("/admin/create/product/", (req, res) => {
+	res.sendFile("/public/views/editProduct.html", { root: __dirname });
+});
+
+app.get("/admin/edit/category/", (req, res) => {
+	res.sendFile("/public/views/editCategory.html", { root: __dirname });
+});
+
+app.get("/admin/create/category/", (req, res) => {
+	res.sendFile("/public/views/editCategory.html", { root: __dirname });
+});
+
 app.get("/settings/", (req, res) => {
 	res.sendFile("/public/views/settings.html", { root: __dirname });
 });

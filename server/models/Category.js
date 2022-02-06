@@ -60,7 +60,40 @@ const Category = {
             }
         });
     },
-
+    /**
+     * Updates an existing category
+     * @param {number} categoryid The id of the category to be updated
+     * @param {Object} data Object containing category data
+     * @param {string} data.category The name of the category to be created
+     * @param {string} data.description The description of the category being created 
+     * @param {{(err: null | any, result: null | object): void}} callback The callback to invoke once the operation is completed
+     */
+    updateCategory: (categoryid, data, callback) => {
+        //Establish a connection to the database
+        connectDB((err, dbConn) => {
+            //Checks if there was an error
+            if (err) {
+                //There was an error
+                return callback(err, null);
+            } else {
+                //There was no error
+                //Proceed with SQL query
+                const sqlQuery = "UPDATE categories SET category = ?, description = ? WHERE categoryid = ?";
+                dbConn.query(sqlQuery, [data.category, data.description, categoryid], (err, results) => {
+                    //Closes the db connection
+                    dbConn.end();
+                    //Checks if there was an error
+                    if (err) {
+                        //There was an error
+                        return callback(err, null);
+                    } else {
+                        //There was no error, return the results
+                        return callback(null, results);
+                    }
+                });
+            }
+        });
+    },
     /**
      * Retrieves the data for all categories
      * @param {{(err: null | any, result: null | object): void}} callback The callback to invoke once the operation is completed

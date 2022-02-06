@@ -23,57 +23,106 @@
                 <div class="mt-5">
                     <h1>Settings</h1>
                 </div>
-                <div class="mt-5 w-50">
-                    <div>
-                        <h3>Account Information</h3>
+                <!-- Account information -->
+                <div class="row justify-content-between">
+                    <div class="mt-5 col-6">
+                        <div>
+                            <h3>Account Information</h3>
+                        </div>
+                        <form class="user vstack gap-3 mt-4">
+                            <div class="mb-3">
+                                <label for="username" class="form-label h5">Username</label>
+                                <input type="text" class="form-control form-control-user mt-1" id="username"
+                                    placeholder="Username">
+                            </div>
+                            <div class="mb-3">
+                                <label for="contactNumber" class="form-label h5">Contact Number</label>
+                                <input type="text" class="form-control form-control-user mt-1" id="contactNumber"
+                                    placeholder="Contact Number">
+                            </div>
+                            <div class="mb-3">
+                                <label for="email" class="form-label h5">Email Address</label>
+                                <input type="email" class="form-control form-control-user mt-1" id="email"
+                                    placeholder="Email Address">
+                            </div>
+                            <div class="mb-3">
+                                <label for="oldPassword" class="form-label h5">Old Password</label>
+                                <input type="password" class="form-control form-control-user mt-1"
+                                    id="oldPassword" placeholder="Password">
+                            </div>
+                            <div class="row mb-3">
+                                <div class="col-6">
+                                    <label for="password" class="form-label h5">New Password</label>
+                                    <input type="password" class="form-control form-control-user mt-1"
+                                        id="password" placeholder="Password">
+                                </div>
+                                <div class="col-6">
+                                    <label for="confirmPassword" class="form-label h5">Confirm Password</label>
+                                    <input type="password" class="form-control form-control-user mt-1"
+                                        id="confirmPassword" placeholder="Confirm Password">
+                                </div>
+                            </div>
+                            <div class="d-flex justify-content-between align-items-center">
+                                <button type="button" onclick="formSubmit()" class="btn btn-primary btn-user btn-block">
+                                    Apply Changes
+                                </button>
+                                <div class="row" style="min-height: 1.7rem;">
+                                    <h6 id="errorMessage" class="fs-6 text-danger"></h6>
+                                </div>
+                            </div>
+                        </form>
                     </div>
-                    <form class="user vstack gap-3 mt-4">
-                        <div class="mb-3">
-                            <label for="username" class="form-label h5">Username</label>
-                            <input type="text" class="form-control form-control-user mt-2" id="username"
-                                placeholder="Username">
+                    <!-- Profile Pic -->
+                    <div class="mt-5 col-5 h-100 d-flex flex-column">
+                        <div>
+                            <h3 class="text-nowrap">Profile Image</h3>
                         </div>
-                        <div class="mb-3">
-                            <label for="contactNumber" class="form-label h5">Contact Number</label>
-                            <input type="text" class="form-control form-control-user" id="contactNumber"
-                                placeholder="Contact Number">
+                        <div id="profileImage" class="mx-auto my-5 text-center rounded-circle"></div>
+                        <div>
+                            <h5>Upload New Profile Image</h5>
                         </div>
-                        <div class="mb-3">
-                            <label for="email" class="form-label h5">Email Address</label>
-                            <input type="email" class="form-control form-control-user" id="email"
-                                placeholder="Email Address">
+                        <div class="input-group mt-1">
+                            <input type="file" class="form-control" id="newProfileImageUpload">
                         </div>
-                        <div class="mb-3">
-                            <label for="oldPassword" class="form-label h5">Old Password</label>
-                            <input type="password" class="form-control form-control-user"
-                                id="oldPassword" placeholder="Password">
-                        </div>
-                        <div class="row mb-3">
-                            <div class="col-6">
-                                <label for="password" class="form-label h5">New Password</label>
-                                <input type="password" class="form-control form-control-user"
-                                    id="password" placeholder="Password">
-                            </div>
-                            <div class="col-6">
-                                <label for="confirmPassword" class="form-label h5">Confirm Password</label>
-                                <input type="password" class="form-control form-control-user"
-                                    id="confirmPassword" placeholder="Confirm Password">
-                            </div>
-                        </div>
-                        <div class="d-flex justify-content-between align-items-center">
-                            <button type="button" onclick="formSubmit()" class="btn btn-primary btn-user btn-block">
-                                Apply Changes
+                        <div class="user d-flex justify-content-between align-items-center mt-3">
+                            <button type="button" onclick="updateImage()" class="btn btn-primary btn-user btn-block">
+                                Upload Image
                             </button>
                             <div class="row" style="min-height: 1.7rem;">
-                                <h6 id="errorMessage" class="fs-6 text-danger"></h6>
+                                <h6 id="fileUploadErrorMessage" class="fs-6 text-danger"></h6>
                             </div>
                         </div>
-                    </form>
+                    </div>
+                </div>
+                <!-- Preferences -->
+                <div class="py-5">
+                    <div class="mt-5">
+                        <h1>Preferences</h1>
+                    </div>
+                    <div class="row">
+                        <div class="col-6">
+                            <div class="mt-5">
+                                <h3>Category Preference</h3>
+                            </div>
+                            <div>
+                                <p class="fs-5">Choose from any of the following categories</p>
+                            </div>
+                            <div id="categoryOptions" class="p-4 border rounded-3 d-flex justify-content-evenly flex-wrap"></div>
+                            <div class="user d-flex justify-content-between align-items-center mt-3">
+                                <button type="button" onclick="updateCategoryPrefs()" class="btn btn-primary btn-user btn-block">
+                                    Confirm Selection
+                                </button>
+                                <div style="min-height: 1.7rem;">
+                                    <h6 id="categoryPrefsErrorMessage" class="fs-6 text-danger"></h6>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
         </section>
         <!-- Footer-->
-        <footer class="container-fluid py-5 bg-dark position-absolute bottom-0">
+        <footer class="container-fluid py-5 bg-dark">
             <div class="container"><p class="m-0 text-center text-white">Copyright &copy; SP IT! 2022</p></div>
         </footer>
         <!-- JQuery -->

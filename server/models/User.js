@@ -295,6 +295,38 @@ const User = {
         }
     },
     /**
+     * Saves the directory of a uploaded image to the database, and associates it with a user
+     * @param {number} userid The id of the user to update the profile picture of
+     * @param {string} dir The path to the uploaded image
+     * @param {{(err: null | any, result: null | object): void}} callback The callback to invoke once the operation is completed
+     */
+    updateProfilePic: (userid, dir, callback) => {
+        //Establish a connection to the database
+        connectDB((err, dbConn) => {
+            //Checks if there was an error
+            if (err) {
+                //There was an error
+                return callback(err, null);
+            } else {
+                //There was no error
+                //Proceed with update
+                const sqlQuery = "UPDATE users SET profile_pic_url = ? WHERE userid = ?";
+                dbConn.query(sqlQuery, [dir, userid], (err, results) => {
+                    //Closes the db connection
+                    dbConn.end();
+                    //Checks if there was an error
+                    if (err) {
+                        //There was an error
+                        return callback(err, null);
+                    } else {
+                        //There was no error, return the results
+                        return callback(null, results);
+                    }
+                });
+            }
+        });
+    },
+    /**
      * Authenticates a user login
      * @param {string} email The user's email address
      * @param {string} password The user's password

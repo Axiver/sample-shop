@@ -41,50 +41,101 @@ const Interest = {
                 return callback(err);
             } else {
                 //There was no error
-                //Loop through the categoryids array to create a new interest for every category id
-                for (let i = 0; i < categoryids.length; i++) {
-                    //Post-loop execution is done within the final iteration because dbConn.query is synchronous, so the loop ends before the operation is actually completed. Doing it this way ensures that the callback isn't invoked early.
-                    //Get the current category id
-                    let categoryid = categoryids[i];
-                    //Check if the record already exists
-                    var sqlQuery = "SELECT * FROM user_interests WHERE userid = ? AND categoryid = ? LIMIT 1";
-                    dbConn.query(sqlQuery, [userid, categoryid], (err, results) => {
-                        //Checks if there was an error
-                        if (err) {
-                            //There was an error
-                            return callback(err);
-                        } else {
-                            //There was no error, check if any rows were returned
-                            if (results.length == 0) {
-                                //No rows were returned, so let's insert the record
-                                sqlQuery = "INSERT INTO user_interests (userid, categoryid) VALUES (?, ?)";
+                //Delete all previous category interests
+                var sqlQuery = "DELETE FROM user_interests WHERE userid = ?";
+                dbConn.query(sqlQuery, userid, (err, results) => {
+                    //Checks if there was an error
+                    if (err) {
+                        //There was an error
+                        return callback(err);
+                    } else {
+                        //There was no error, proceed with inserting the new data
+                        //Check if there is any data to insert
+                        if (categoryids.length > 0) {
+                            //There is at least 1 new data to insert
+                            //Loop through the categoryids array to create a new interest for every category id
+                            for (let i = 0; i < categoryids.length; i++) {
+                                //Post-loop execution is done within the final iteration because dbConn.query is synchronous, so the loop ends before the operation is actually completed. Doing it this way ensures that the callback isn't invoked early.
+                                //Get the current category id
+                                let categoryid = categoryids[i];
+                                //Check if the record already exists
+                                var sqlQuery = "SELECT * FROM user_interests WHERE userid = ? AND categoryid = ? LIMIT 1";
                                 dbConn.query(sqlQuery, [userid, categoryid], (err, results) => {
                                     //Checks if there was an error
                                     if (err) {
                                         //There was an error
                                         return callback(err);
                                     } else {
-                                        //There was no error, check if this is the last iteration of the loop
-                                        if (i == categoryids.length - 1) {
-                                            //This is the last iteration, all interests have been created
-                                            //Closes the db connection
-                                            dbConn.end();
-                                            return callback(null);
+                                        //There was no error, check if any rows were returned
+                                        if (results.length == 0) {
+                                            //No rows were returned, so let's insert the record
+                                            sqlQuery = "INSERT INTO user_interests (userid, categoryid) VALUES (?, ?)";
+                                            dbConn.query(sqlQuery, [userid, categoryid], (err, results) => {
+                                                //Checks if there was an error
+                                                if (err) {
+                                                    //There was an error
+                                                    return callback(err);
+                                                } else {
+                                                    //There was no error, check if this is the last iteration of the loop
+                                                    if (i == categoryids.length - 1) {
+                                                        //This is the last iteration, all interests have been created
+                                                        //Closes the db connection
+                                                        dbConn.end();
+                                                        return callback(null);
+                                                    }
+                                                }
+                                            });
+                                        } else {
+                                            //The entry already exists, check if this is the last iteration
+                                            if (i == categoryids.length - 1) {
+                                                //This is the last iteration, all interests have been created
+                                                //Closes the db connection
+                                                dbConn.end();
+                                                return callback(null);
+                                            }
                                         }
                                     }
                                 });
-                            } else {
-                                //The entry already exists, check if this is the last iteration
-                                if (i == categoryids.length - 1) {
-                                    //This is the last iteration, all interests have been created
-                                    //Closes the db connection
-                                    dbConn.end();
-                                    return callback(null);
-                                }
                             }
+                        } else {
+                            //There is no new data to be inserted, user only wanted to clear all data
+                            dbConn.end();
+                            return callback(null);
                         }
-                    });
-                }
+                    }
+                });
+            }
+        });
+    },
+    /**
+     * Gets all the category interests of a particular user
+     * @param {number} userid The id of the user
+     * @param {{(err: null | any): void}} callback The callback to invoke once the operation is completed
+     */
+    getAllInterests: (userid, callback) => {
+        //Establish a connection to the database
+        connectDB((err, dbConn) => {
+            //Checks if there was an error
+            if (err) {
+                //There was an error
+                return callback(err);
+            } else {
+                //Proceed with query
+                var sqlQuery = "SELECT categoryid FROM user_interests WHERE userid = ?";
+                dbConn.query(sqlQuery, userid, (err, result) => {
+                    //Checks if there was an error
+                    if (err) {
+                        //There was an error
+                        return callback(err);
+                    } else {
+                        //There was no error
+                        //End the db conn
+                        dbConn.end();
+                        
+                        //Return the result
+                        callback(null, result);
+                    }
+                });
             }
         });
     },
@@ -111,7 +162,6 @@ const Interest = {
                     } else {
                         //There was no error, check if any rows were returned
                         if (result.length > 0) {
-                            console.log("res:", result);
                             //At least 1 row was returned. Update the view count
                             sqlQuery = "UPDATE products SET views = ? WHERE productid = ?";
                             dbConn.query(sqlQuery, result[0] + 1, (err, results) => {

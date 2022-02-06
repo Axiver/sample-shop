@@ -164,6 +164,9 @@ function renderProductInfo() {
         //Check if any data was obtained
         if (data) {
             //The product id is valid, render the data
+            //-- Product Category --//
+            $("#category-name").empty().text(data.categoryname);
+
             //-- Product Name --//
             $("#product-name").empty().html(data.name);
 

@@ -82,15 +82,53 @@ const Product = {
                 //Proceed with SQL query
                 const sqlQuery = "INSERT INTO products (name, description, categoryid, brand, price) VALUES (?, ?, ?, ?, ?)";
                 dbConn.query(sqlQuery, [data.name, description, categoryid, brand, price], (err, results) => {
-                    //Closes the db connection
-                    dbConn.end();
                     //Checks if there was an error
                     if (err) {
                         //There was an error
                         return callback(err, null);
                     } else {
-                        //There was no error, return the results
+                        //Closes the db connection
                         dbConn.end();
+                        //There was no error, return the results
+                        return callback(null, results);
+                    }
+                });
+            }
+        });
+    },
+    /**
+     * Modifies an existing product
+     * @param {number} productid The id of the product to be modified
+     * @param {Object} data Information about the product to be modified
+     * @param {string} data.name The name of the product
+     * @param {string} data.description The description of the product
+     * @param {number} data.categoryid The id of the category the product falls under
+     * @param {string} data.brand The brand of the product
+     * @param {number} data.price The price of the product 
+     * @param {{(err: null | any, result: null | object): void}} callback The callback to invoke once the operation is completed
+     */
+    modifyProduct: (productid, data, callback) => {
+        //Deconstruct the data object
+        ({description, categoryid, brand, price} = data);
+        //Establish a connection to the database
+        connectDB((err, dbConn) => {
+            //Checks if there was an error
+            if (err) {
+                //There was an error
+                return callback(err, null);
+            } else {
+                //There was no error
+                //Proceed with SQL query
+                const sqlQuery = "UPDATE products SET name = ?, description = ?, categoryid = ?, brand = ?, price = ? WHERE productid = ?";
+                dbConn.query(sqlQuery, [data.name, description, categoryid, brand, price, productid], (err, results) => {
+                    //Checks if there was an error
+                    if (err) {
+                        //There was an error
+                        return callback(err, null);
+                    } else {
+                        //Closes the db connection
+                        dbConn.end();
+                        //There was no error, return the results
                         return callback(null, results);
                     }
                 });
@@ -123,6 +161,51 @@ const Product = {
                     } else {
                         //There was no error, return the results
                         return callback(null, results);
+                    }
+                });
+            }
+        });
+    },
+    /**
+     * Gets info of products starting from a particular productid (In orders of 15)
+     * @param {number} productid The id to start from
+     * @param {{(err: null | any, result: null | object): void}} callback The callback to invoke once the operation is completed
+     */
+     getProductFromId: (productid, callback) => {
+        //Establish a connection to the database
+        connectDB((err, dbConn) => {
+            //Checks if there was an error
+            if (err) {
+                //There was an error
+                return callback(err, null);
+            } else {
+                //There was no error
+                //Proceed with SQL query to get the total number of rows
+                const sqlQuery = "SELECT COUNT(*) FROM products";
+                dbConn.query(sqlQuery, [], (err, results) => {
+                    //Checks if there was an error
+                    if (err) {
+                        //There was an error
+                        return callback(err, null);
+                    } else {
+                        //There was no error, save the row count
+                        const totalRows = results[0]["COUNT(*)"];
+
+                        //Proceed with querying products
+                        const sqlQuery = "SELECT productid, name, products.description, products.categoryid, categories.category, brand, price FROM products, categories WHERE productid >= ? AND productid <= ? AND categories.categoryid = products.categoryid ORDER BY productid ASC LIMIT 15";
+                        dbConn.query(sqlQuery, [productid, (productid + 14)], (err, results) => {
+                            //Closes the db connection
+                            dbConn.end();
+                            //Checks if there was an error
+                            if (err) {
+                                //There was an error
+                                return callback(err, null);
+                            } else {
+                                //There was no error, return the results
+                                results = {"results": results, "totalrows": totalRows};
+                                return callback(null, results);
+                            }
+                        });
                     }
                 });
             }
@@ -502,7 +585,38 @@ const Product = {
             }
         });
     },
-
+    /**
+     * Deletes the image with a particular sequence id of a particular product
+     * @param {*} productid The id of the product
+     * @param {*} sequenceid The sequence id of the image 
+     * @param {*} callback 
+     */
+    deleteImage: (productid, imageid, callback) => {
+        //Establish a connection to the database
+        connectDB((err, dbConn) => {
+            //Checks if there was an error
+            if (err) {
+                //There was an error
+                return callback(err, null);
+            } else {
+                //There was no error
+                //Proceed with SQL query
+                const sqlQuery = "DELETE FROM product_images WHERE productid = ? AND sequence = ?";
+                dbConn.query(sqlQuery, [productid, imageid], (err, results) => {
+                    //Closes the db connection
+                    dbConn.end();
+                    //Checks if there was an error
+                    if (err) {
+                        //There was an error
+                        return callback(err, null);
+                    } else {
+                        //There was no error, return the results
+                        return callback(null, results);
+                    }
+                });
+            }
+        });
+    },
     /**
      * Retrieves the number of images a particular product has
      * @param {number} productid The ID of the product

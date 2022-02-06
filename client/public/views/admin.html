@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no" />
+        <meta name="description" content="" />
+        <meta name="author" content="" />
+        <title>SP IT! - Product Page</title>
+        <!-- Favicon-->
+        <link rel="icon" type="image/x-icon" href="/assets/favicon.ico" />
+        <!-- Fontawsome icons-->
+        <link rel="stylesheet" href="https://pro.fontawesome.com/releases/v5.10.0/css/all.css" integrity="sha384-AYmEC3Yw5cVb3ZcuHtOA93w35dYTsvhLPVnYs9eStHfGJvOvKxVfELGroGkvsg+p" crossorigin="anonymous"/>
+        <!-- Custom styles for this template-->
+        <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC" crossorigin="anonymous">
+        <!-- Page styles-->
+        <link href="../css/main.css" rel="stylesheet" />
+        <link href="../css/admin.css" rel="stylesheet" />
+    </head>
+    <body class="vh-100 d-flex flex-column">
+        <!-- Content -->
+        <section class="container-fluid row d-flex justify-content-center py-5">
+            <div class="col-8">
+                <div class="mt-5">
+                    <h1>Admin Panel</h1>
+                </div>
+                <!-- Product List -->
+                <div class="row justify-content-between">
+                    <div class="mt-5 col-12">
+                        <div>
+                            <h3>All Products</h3>
+                        </div>
+                        <table class="table table-striped mt-4">
+                            <thead>
+                                <tr class="text-center">
+                                    <th scope="col">#</th>
+                                    <th class="text-start" scope="col">Name</th>
+                                    <th class="text-start" scope="col">Description</th>
+                                    <th class="text-start" scope="col">Category Name</th>
+                                    <th scope="col">Brand</th>
+                                    <th scope="col">Price</th>
+                                    <th scope="col">Upcoming Promotions</th>
+                                    <th scope="col"></th>
+                                </tr>
+                            </thead>
+                            <tbody id="product-list-content"></tbody>
+                        </table>
+                        <div class="d-flex justify-content-between mt-4">
+                            <div>
+                                <p class="fs-6">Page <span id="currProductPageIndicator">1</span> of <span id="maxProductPageIndicator">1</span></p>
+                            </div>
+                            <a class="btn btn-primary rounded-pill px-4" href="/admin/create/product">Create Product</a>
+                        </div>
+                    </div>
+                </div>
+                <!-- Category List -->
+                <div class="row justify-content-between">
+                    <div class="mt-5 col-12">
+                        <div>
+                            <h3>All Categories</h3>
+                        </div>
+                        <table class="table table-striped mt-4">
+                            <thead>
+                                <tr class="text-center">
+                                    <th scope="col">#</th>
+                                    <th class="text-start" scope="col">Name</th>
+                                    <th class="text-start" scope="col">Description</th>
+                                    <th scope="col"></th>
+                                </tr>
+                            </thead>
+                            <tbody id="category-list-content"></tbody>
+                        </table>
+                        <div class="d-flex justify-content-between mt-4">
+                            <div>
+                                <p class="fs-6">Page <span id="currCategoryPageIndicator">1</span> of <span id="maxCategoryPageIndicator">1</span></p>
+                            </div>
+                            <a class="btn btn-primary rounded-pill px-4" href="/admin/create/category">Create Category</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+        <!-- Footer-->
+        <footer class="container-fluid py-5 bg-dark">
+            <div class="container"><p class="m-0 text-center text-white">Copyright &copy; SP IT! 2022</p></div>
+        </footer>
+        <!-- JQuery -->
+        <script src="https://code.jquery.com/jquery-3.6.0.min.js" integrity="sha256-/xUj+3OJU5yExlq6GSYGSHk7tPXikynS7ogEvDej/m4=" crossorigin="anonymous"></script>
+        <!-- Axios -->
+        <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+        <!-- Core JS-->
+        <script src="/scripts/admin.js"></script>
+        <!-- Bootstrap core JavaScript-->
+        <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js" integrity="sha384-MrcW6ZMFYlzcLA8Nl+NtUVF0sA7MsXsP1UyJoMp4YLEuNSfAP+JcXn/tWtIaxVXM" crossorigin="anonymous"></script>
+    </body>
+</html>

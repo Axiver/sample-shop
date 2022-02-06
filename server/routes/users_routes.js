@@ -7,12 +7,23 @@ const express = require("express");
 const router = express.Router();
 const jwt = require("jsonwebtoken");
 const configs = require("../config/config.js");
+const fs = require("fs");
+const multer = require("multer");
+const { imageHash } = require("image-hash");
 
 //Models
 const User = require("../models/User");
 
 //Middlewares
 const isLoggedInMiddleware = require("../auth/isLoggedInMiddleware");
+
+//-- Configure multer --//
+const upload = multer({
+    limits:{
+        //Limit filesize to 1MB
+        fileSize: "1MB"
+    }
+}).single("image");
 
 //-- Functions --//
 /**
@@ -238,6 +249,81 @@ router.put("/:id", isLoggedInMiddleware, (req, res) => {
         }
     });
 });
+
+/**
+ * Uploads a image to the server for a specific product
+ */
+router.put("/:id/profilepic", isLoggedInMiddleware, (req, res) => {
+    //Retrieve the userid from the url
+    const userid = req.params.id;
+
+    //Check if the user is logged in to the they are trying to modify
+    if (req.decodedToken.userid != userid) {
+        //The user is not logged in to the correct account
+        return res.status(401).send();
+    }
+
+    //User is logged in to the correct account, handle the image upload
+    upload(req, res, async (err) => {
+        //Checks if there was an error
+        if (err) {
+            console.log(err);
+            //Checks if the error is due to filesize limit
+            if (err.code == "LIMIT_FILE_SIZE") {
+                //The file being uploaded is too large
+                return res.status(413).send();
+            }
+            return res.status(500).send();
+        }
+
+        //Get the file extension
+        const fileExt = req.file.originalname.split(".").at(-1).replace(/ /g, "");
+
+        //Check if the file extension is allowed
+        if (fileExt !== 'png' && fileExt !== 'jpg' && fileExt !== 'jpeg') {
+            //The file is not allowed
+            console.log("Filetype not allowed");
+            return res.status(415).send();
+        }
+        //The file passes the checks, it is allowed
+        //Get a hash of the file
+        const buffer = req.file.buffer;
+        imageHash({
+            name: req.file.originalname,
+            data: buffer
+        }, 16, true, (err, data) => {
+            //Check if there was an error
+            if (err) {
+                console.log(err);
+                return res.status(500).send();
+            }
+            //There was no error
+            //Write the file to disk with a filepath of /uploads/ and filename of <hash of file> + <file ext>
+            let filepath = `./uploads/profile_images/${data}.${fileExt}`;
+            fs.writeFile(filepath, buffer, (err) => {
+                //Checks if there was an error
+                if (err) {
+                    //There was an error
+                    console.log(err);
+                    return res.status(500).send();
+                }
+                //There was no error, save the filepath to db
+                User.updateProfilePic(userid, `/profile_images/${data}.${fileExt}`, (err, result) => {
+                    //Checks if there was an error
+                    if (err) {
+                        //There was an error
+                        console.log(err);
+                        return res.status(500).send();
+                    }
+                    //There was no error, return the url of the new image
+                    let response = {"url": `/profile_images/${data}.${fileExt}`};
+                    return res.status(200).send(response);
+                });
+            });
+        });
+    })
+});
+
 
 //Export routes
 module.exports = router

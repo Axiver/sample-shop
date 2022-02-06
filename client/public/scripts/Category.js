@@ -27,11 +27,72 @@ class Category {
     }
 
     /**
+     * Creates a new category
+     * @param {string} categoryName The name of the category 
+     * @param {string} categoryDescription The description of the category
+     * @param {string} bearerToken Bearer token
+     * @param {()} callback Invoked when the operation is completed
+     */
+    static _createCategory(categoryName, categoryDescription, bearerToken, callback) {
+        const reqUrl = User.baseUrl + `/api/category/`;
+        axios.post(reqUrl, {
+            category: categoryName,
+            description: categoryDescription
+        },
+        {
+            headers: { 
+                "Authorization": "Bearer " + bearerToken 
+            }
+        }).then((response) => {
+            //Invoke callback with the response data
+            if (callback)
+                callback(null, response);
+            return;
+        }).catch((err) => {
+            //Error encountered, return the error message
+            if (callback)
+                callback(err);
+            return;
+        });
+    }
+
+    /**
+     * Modifes an existing category
+     * @param {number} categoryid The id of the category to be modified
+     * @param {string} categoryName The name of the category 
+     * @param {string} categoryDescription The description of the category
+     * @param {string} bearerToken Bearer token
+     * @param {()} callback Invoked when the operation is completed
+     */
+     static _modifyCategory(categoryid, categoryName, categoryDescription, bearerToken, callback) {
+        const reqUrl = User.baseUrl + `/api/category/` + categoryid;
+        axios.put(reqUrl, {
+            category: categoryName,
+            description: categoryDescription
+        },
+        {
+            headers: { 
+                "Authorization": "Bearer " + bearerToken 
+            }
+        }).then((response) => {
+            //Invoke callback with the response data
+            if (callback)
+                callback(null, response);
+            return;
+        }).catch((err) => {
+            //Error encountered, return the error message
+            if (callback)
+                callback(err);
+            return;
+        });
+    }
+
+    /**
      * Renders a wrapper for a category
      * @param {string} categoryName The name of the category
      * @returns The rendered component
      */
-    static _wrapper(categoryName) {
+    static _renderWrapper(categoryName) {
         return (
             `
             <div class="mt-4 pt-4 mx-auto">
@@ -50,12 +111,88 @@ class Category {
         );
     }
 
+    /**
+     * Renders a option button for a category
+     * @param {string} categoryName The name of the category
+     * @param {number} categoryid The id of the category
+     * @returns The rendered component
+     */
+     static _renderOptionButton(categoryName, categoryid) {
+        return (
+            `
+            <div class="d-inline-block py-2">
+                <input type="checkbox" class="btn-check" id="option-${categoryName}" autocomplete="off" data-categoryid="${categoryid}">
+                <label class="btn btn-outline-secondary text-nowrap rounded-pill px-4" for="option-${categoryName}">${categoryName}</label>
+            </div>
+            `
+        );
+    }
+
+    /**
+     * Renders a select option for a category
+     * @param {string} categoryName The name of the category
+     * @param {number} categoryid The id of the category
+     */
+    static _renderSelectOption(categoryName, categoryid) {
+        return (
+            `
+                <option value="${categoryName}" data-categoryid="${categoryid}">${categoryName}</option>
+            `
+        );
+    }
+
+    /**
+     * Renders a table row
+     * @param {number} rownumber The id of the current row being rendered
+     * @param {number} categoryid The id of the category 
+     * @param {string} name The name of the category
+     * @param {string} desc The description of the category
+     * @returns Rendered component
+     */
+    static _renderTableRow(rownumber, categoryid, name, desc) {
+        //Formats the category name
+        if (name.length > 40) {
+            //Cut the name short
+            name = name.substring(0, 39).trim() + "...";
+       }
+
+       //Formats the category description
+       if (desc.length > 50) {
+           //Cut the description short
+           desc = desc.substring(0, 49).trim() + "...";
+       }
+       //Return the component
+       return (
+           `
+           <tr class="text-center">
+               <th class="align-middle" scope="row">${rownumber}</th>
+               <td class="align-middle text-start">${name}</td>
+               <td class="align-middle text-start">${desc}</td>
+               <td class="align-middle text-end px-3"><a class="btn btn-primary rounded-pill px-4" href="/admin/edit/category/?categoryid=${categoryid}">Edit</a></td>
+           </tr>
+           `
+       )
+    }
+
     //Expose methods
     static query = {
         getAll: this._getAll
     }
 
     static render = {
-        wrapper: this._wrapper
+        wrapper: this._renderWrapper,
+        optionButton: this._renderOptionButton,
+        selectOption: this._renderSelectOption,
+        table: {
+            row: this._renderTableRow
+        }
+    }
+
+    static create = {
+        category: this._createCategory
+    }
+
+    static modify = {
+        category: this._modifyCategory
     }
 }

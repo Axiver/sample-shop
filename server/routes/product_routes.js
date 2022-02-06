@@ -7,7 +7,6 @@ const express = require("express");
 const router = express.Router();
 const fs = require("fs");
 const multer = require("multer");
-const path = require("path");
 const { imageHash } = require("image-hash");
 
 //Models
@@ -55,9 +54,6 @@ const upload = multer({
  * Creates a new product
  */
 router.post("/", [isLoggedInMiddleware, isAdminMiddleware], (req, res) => {
-    //Get the user id of the account the user is logged in to
-    const userid = req.decodedToken.userid;
-
     //Trims the user input before passing it through to the createProduct method
     trimObject(req.body, (err, trimmedInput) => {
         //Check if there was an error
@@ -68,7 +64,7 @@ router.post("/", [isLoggedInMiddleware, isAdminMiddleware], (req, res) => {
         } else {
             //There was no error
             //Create the product
-            Product.createProduct(userid, trimmedInput, (err, result) => {
+            Product.createProduct(trimmedInput, (err, result) => {
                 //Checks if there was an error
                 if (err) {
                     //There was an error
@@ -171,7 +167,7 @@ router.post("/:id/image", [isLoggedInMiddleware, isAdminMiddleware], (req, res) 
             }
             //There was no error
             //Write the file to disk with a filepath of /uploads/ and filename of <hash of file> + <file ext>
-            let filepath = `./uploads/${data}.${fileExt}`;
+            let filepath = `./uploads/product_images/${data}.${fileExt}`;
             fs.writeFile(filepath, buffer, (err) => {
                 //Checks if there was an error
                 if (err) {
@@ -192,8 +188,8 @@ router.post("/:id/image", [isLoggedInMiddleware, isAdminMiddleware], (req, res) 
                         }
                         return res.status(500).send();
                     }
-                    //There was no error, send the sequence id back to the client
-                    let response = {"sequence": result.sequence};
+                    //There was no error, send the sequence id and image url back to the client
+                    let response = {"sequence": result.sequence, "url": filepath};
                     return res.status(201).send(response);
                 });
             });
@@ -224,6 +220,41 @@ router.get("/:id", (req, res) => {
                 response.categoryname = response.category;
                 delete response.category;
                 return res.status(200).send(response);
+            } else {
+                //No results were returned
+                return res.status(500).send();
+            }
+        }
+    });
+});
+
+/**
+ * Retrieves products starting from a particular index
+ */
+ router.get("/from/:id", (req, res) => {
+    //Get the id supplied in the request parameter
+    let productid = req.params.id;
+
+    //Retrieves data for the product with a specific id
+    Product.getProductFromId(productid, (err, result) => {
+        //Checks if there was an error
+        if (err) {
+            //There was an error
+            console.log(err);
+            return res.status(500).send();
+        } else {
+            //There was no error, check if any results were returned
+            if (result.results.length > 0) {
+                //There was at least 1 row returned, format the response
+                for (let i = 0; i < result.results.length; i++) {
+                    let element = result.results[i];
+                    element.categoryname = element.category;
+                    delete element.category;
+                    //Update the result array
+                    result.results[i] = element;
+                }
+                //Send the response
+                return res.status(200).send(result);
             } else {
                 //No results were returned
                 return res.status(500).send();
@@ -485,6 +516,42 @@ router.get("/:id/image/:sequence", (req, res) => {
 
 
 //-- PUT request handling --//
+/**
+ * Modifies an existing product
+ */
+ router.put("/:id", [isLoggedInMiddleware, isAdminMiddleware], (req, res) => {
+    //Retrieve the product id from url params
+    const productid = req.params.id;
+    //Trims the user input before passing it through to the modifyProduct method
+    trimObject(req.body, (err, trimmedInput) => {
+        //Check if there was an error
+        if (err) {
+            //There was an error
+            console.log(err);
+            return res.status(500).send();
+        } else {
+            //There was no error
+            //Create the product
+            Product.modifyProduct(productid, trimmedInput, (err, result) => {
+                //Checks if there was an error
+                if (err) {
+                    //There was an error
+                    console.log(err);
+                    //Check if the error was because the user was unauthorised
+                    if (err == "unauthorised") {
+                        //User is unauthorised, not an admin account
+                        return res.status(401).send();
+                    }
+
+                    return res.status(500).send();
+                } else {
+                    //There was no error
+                    return res.status(204).send();
+                }
+            });
+        }
+    });
+});
 
 
 //-- DELETE request handling --//
@@ -496,6 +563,27 @@ router.delete("/:id", [isLoggedInMiddleware, isAdminMiddleware], (req, res) => {
     let productid = req.params.id;
     //Deletes the product with the product id
     Product.deleteProduct(productid, (err, result) => {
+        //Checks if there was an error
+        if (err) {
+            //There was an error
+            console.log(err);
+            return res.status(500).send();
+        } else {
+            //There was no error
+            return res.status(204).send();
+        }
+    });
+});
+
+/**
+ * Deletes a image with a specific id
+ */
+ router.delete("/:productid/image/:imageid", [isLoggedInMiddleware, isAdminMiddleware], (req, res) => {
+    //Get the id supplied in the request parameter
+    const productid = req.params.productid;
+    const imageid = req.params.imageid;
+    //Deletes the image with a imageid for the product with the product id
+    Product.deleteImage(productid, imageid, (err, result) => {
         //Checks if there was an error
         if (err) {
             //There was an error

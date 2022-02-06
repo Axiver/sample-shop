@@ -37,11 +37,11 @@ const isLoggedInMiddleware = require("../auth/isLoggedInMiddleware");
 }
 
 
-//-- POST Request handling --//
+//-- PUT Request handling --//
 /**
- * Creates new category interests for a user
+ * Updates category interests for a user
  */
-router.post("/:userid", isLoggedInMiddleware, (req, res) => {
+router.put("/:userid", isLoggedInMiddleware, (req, res) => {
     //Obtain the user id from the request parameters
     let userid = req.params.userid;
 
@@ -52,7 +52,7 @@ router.post("/:userid", isLoggedInMiddleware, (req, res) => {
     }
 
     //Create an array of interests from req.body.categoryids
-    let interests = req.body.categoryids.split(",");
+    let interests = req.body.categoryids;
 
     //Run the array through input sanitation
     trimObject(interests, (err, result) => {
@@ -81,10 +81,32 @@ router.post("/:userid", isLoggedInMiddleware, (req, res) => {
 
 
 //-- GET Request handling --//
+/**
+ * Gets all category interests for a particular user
+ */
+router.get("/:userid", isLoggedInMiddleware, (req, res) => {
+    //Obtain the user id from the request parameters
+    let userid = req.params.userid;
 
+    //Check if the userid supplied matches the userid of the account the user is logged in to
+    if (req.decodedToken.userid != userid) {
+        //It does not match, this is an unauthorised request
+        return res.status(401).send();
+    }
 
-
-//-- PUT request handling --//
+    //Retrieve category interest for the user
+    Interest.getAllInterests(userid, (err, result) => {
+        //Check if there was an error
+        if (err) {
+            //There was an error
+            console.log(err);
+            return res.status(500).send();
+        } else {
+            //There was no error, return the result
+            return res.status(200).send(result);
+        }
+    });
+});
 
 
 //Export routes

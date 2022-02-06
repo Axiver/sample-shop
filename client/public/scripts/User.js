@@ -80,7 +80,7 @@ class User {
     }
 
     /**
-     * Updates an existing user account
+     * Updates the details of an existing user account
      * @param {number} userid The id of the user account to be updated
      * @param {string} bearerToken The bearer token
      * @param {string} username The username of the account
@@ -91,7 +91,7 @@ class User {
      * @param {()} callback Invoked when the request is complete
      * @returns {string?} Error message 
      */
-    static update(userid, bearerToken, username, contact, email, oldPassword, password, callback) {
+    static _updateUserInfo(userid, bearerToken, username, contact, email, oldPassword, password, callback) {
         const reqUrl = User.baseUrl + '/api/users/' + userid;
         //Craft the payload
         let payload = {
@@ -109,6 +109,64 @@ class User {
         axios.put(reqUrl, payload,
         {
             headers: { 
+                "Authorization": "Bearer " + bearerToken 
+            }
+        }).then((response) => {
+            //Invoke callback with the response data
+            if (callback)
+                callback(null, response);
+            return;
+        }).catch((err) => {
+            //Error encountered, return the error message
+            if (callback)
+                callback(err.response.data);
+            return;
+        });
+    }
+
+    /**
+     * Updates the profile image of an existing user account
+     * @param {numb} userid The id of the user account to be updated
+     * @param {string} bearerToken The bearer token
+     * @param {object} formData Form data containing the profile picture
+     * @param {()} callback Invoked when the request is complete
+     * @returns {string?} Error message
+     */
+    static _updateProfilePic(userid, bearerToken, formData, callback) {
+        const reqUrl = User.baseUrl + `/api/users/${userid}/profilepic`;
+        axios.put(reqUrl, formData,
+        {
+            headers: {
+                'Content-Type': 'multipart/form-data',
+                "Authorization": "Bearer " + bearerToken 
+            }
+        }).then((response) => {
+            //Invoke callback with the response data
+            if (callback)
+                callback(null, response);
+            return;
+        }).catch((err) => {
+            //Error encountered, return the error message
+            if (callback)
+                callback(err.response.data);
+            return;
+        });
+    }
+
+    /**
+     * Updates the category preferences of an existing user account
+     * @param {number} userid The id of the user accoutn to be updated
+     * @param {string} bearerToken The bearer token
+     * @param {[]} categories An array of cateogry ids
+     * @param {()} callback Invoked when the request is complete
+     */
+    static _updateCategoryPrefs(userid, bearerToken, categories, callback) {
+        const reqUrl = User.baseUrl + `/api/interest/${userid}`;
+        axios.put(reqUrl, {
+            categoryids: categories
+        },
+        {
+            headers: {
                 "Authorization": "Bearer " + bearerToken 
             }
         }).then((response) => {
@@ -144,6 +202,32 @@ class User {
         storageSystem.setItem("username", username);
         storageSystem.setItem("type", type);
         storageSystem.setItem("profilepic", profilepic);
+
+        //Invoke callback
+        if (callback)
+            callback();
+
+        return;
+    }
+
+    /**
+     * Updates data in the session storage
+     * @param {string} key Key to update
+     * @param {string} value The value to update the key to
+     * @param {()} callback Invoked upon completion
+     */
+    static updateSessionData(key, value, callback) {
+        //Set default storage system
+        let storageSystem = sessionStorage;
+
+        //Check if user is logged in persistently
+        if (localStorage.getItem(key)) {
+            //Yes they are, update storage system to use persistent storage
+            storageSystem = localStorage;
+        }
+
+        //Update key value
+        storageSystem.setItem(key, value);
 
         //Invoke callback
         if (callback)
@@ -248,11 +332,45 @@ class User {
         });
     }
 
+    /**
+     * Retrieves an array of category interests for a particular userid
+     * @param {number} userid The id of the user to retrieve the category interests for
+     * @param {string} bearerToken The bearer token
+     * @param {()} callback Invoked when the request is complete
+     */
+     static _queryCategoryInterests(userid, bearerToken, callback) {
+        const reqUrl = User.baseUrl + '/api/interest/' + userid;
+        axios({
+            method: 'get',
+            url: reqUrl,
+            timeout: 1000,
+            headers: {
+                "Authorization": "Bearer " + bearerToken 
+            }
+        }).then((response) => {
+            //Return the result
+            if (callback)
+                callback(response.data);
+            return response.data;
+        }).catch((err) => {
+            //Error encountered, return null
+            if (callback)
+                callback(null);
+            return null;
+        });
+    }
 
     //-- Expose methods --//
     static query = {
         by: {
             id: this._queryById
-        }
+        },
+        categoryInterests: this._queryCategoryInterests
+    }
+
+    static update = {
+        userInfo: this._updateUserInfo,
+        profilePic: this._updateProfilePic,
+        categoryPrefs: this._updateCategoryPrefs
     }
 }

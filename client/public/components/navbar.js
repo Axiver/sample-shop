@@ -88,7 +88,7 @@ const navbar = {
 							<a class="nav-link dropdown-toggle" href="#" id="userDropdown" role="button"
 								data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
 								<span class="me-2 d-none d-lg-inline text-gray-600">${username}</span>
-								<img class="img-profile rounded-circle" src="${User.parseProfilePicUrl(profilepic)}">
+								<img class="img-profile rounded-circle" style="object-fit: cover;" src="${User.parseProfilePicUrl(profilepic)}">
 							</a>
 							<!-- Dropdown - User Information -->
 							<div class="dropdown-menu dropdown-menu-end shadow animated--grow-in"
@@ -156,7 +156,7 @@ const navbar = {
 						<div class="container-fluid">
 							<!-- Branding -->
 							<a class="navbar-brand font-weight-bold ms-3 float-start" href="/">
-								<img class="align-text-bottom" src="../assets/img/sp_logo.jpg" width="30" height="30" class="d-inline-block align-top" alt="">
+								<img class="align-text-bottom" src="/assets/img/sp_logo.jpg" width="30" height="30" class="d-inline-block align-top" alt="">
 								<span class="h4">IT!</span>
 							</a>
 			

@@ -68,7 +68,8 @@ router.post("/", [isLoggedInMiddleware, isAdminMiddleware], (req, res) => {
                     }
                 } else {
                     //There was no error
-                    return res.status(204).send();
+                    let response = {"categoryid": result.insertId};
+                    return res.status(201).send(response);
                 }
             });
         }
@@ -97,7 +98,38 @@ router.get("/", (req, res) => {
 
 
 //-- PUT request handling --//
+/**
+ * Updates an exisitng category
+ */
+ router.put("/:id", [isLoggedInMiddleware, isAdminMiddleware], (req, res) => {
+    //Retrirve the category id from the url params
+    const categoryid = req.params.id;
+    //Trims the user input before passing it through to the updateCategory method
+    trimObject(req.body, (err, trimmedInput) => {
+        //Check if there was an error
+        if (err) {
+            //There was an error
+            console.log(err);
+            return res.status(500).send();
+        } else {
+            //There was no error
+            //Update the category
+            Category.updateCategory(categoryid, trimmedInput, (err, result) => {
+                //Checks if there was an error
+                if (err) {
+                    //There was an error
+                    console.log(err);
 
+                    //Unknown error occured
+                    return res.status(500).send();
+                } else {
+                    //There was no error
+                    return res.status(204).send();
+                }
+            });
+        }
+    });
+});
 
 //Export routes
 module.exports = router
