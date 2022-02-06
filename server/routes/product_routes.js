@@ -148,7 +148,7 @@ router.post("/:id/image", [isLoggedInMiddleware, isAdminMiddleware], (req, res) 
         const fileExt = req.file.originalname.split(".").at(-1).replace(/ /g, "");
 
         //Check if the file extension is allowed
-        if (fileExt !== 'png' && fileExt !== 'jpg' && fileExt !== 'jpeg') {
+        if (fileExt !== 'png' && fileExt !== 'jpg' && fileExt !== 'jpeg' && fileExt !=="jfif") {
             //The file is not allowed
             console.log("Filetype not allowed");
             return res.status(415).send();

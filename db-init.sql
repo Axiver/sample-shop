@@ -1,5 +1,3 @@
-CREATE DATABASE  IF NOT EXISTS `bed_ca1` /*!40100 DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci */ /*!80016 DEFAULT ENCRYPTION='N' */;
-USE `bed_ca1`;
 -- MySQL dump 10.13  Distrib 8.0.27, for Win64 (x86_64)
 --
 -- Host: localhost    Database: bed_ca1
@@ -31,7 +29,7 @@ CREATE TABLE `categories` (
   PRIMARY KEY (`categoryid`),
   UNIQUE KEY `categoryid_UNIQUE` (`categoryid`),
   UNIQUE KEY `category_UNIQUE` (`category`)
-) ENGINE=InnoDB AUTO_INCREMENT=6 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=20 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -52,7 +50,7 @@ CREATE TABLE `product_images` (
   UNIQUE KEY `productid_path` (`productid`,`path`),
   KEY `product_images_productid_idx` (`productid`,`sequence`),
   CONSTRAINT `product_images_productid` FOREIGN KEY (`productid`) REFERENCES `products` (`productid`) ON DELETE CASCADE
-) ENGINE=InnoDB AUTO_INCREMENT=32 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=96 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -65,7 +63,7 @@ DROP TABLE IF EXISTS `products`;
 CREATE TABLE `products` (
   `productid` int NOT NULL AUTO_INCREMENT,
   `name` varchar(255) NOT NULL,
-  `description` varchar(255) NOT NULL,
+  `description` longtext NOT NULL,
   `categoryid` int NOT NULL,
   `brand` varchar(255) NOT NULL,
   `price` double NOT NULL,
@@ -74,7 +72,7 @@ CREATE TABLE `products` (
   UNIQUE KEY `productid_UNIQUE` (`productid`),
   KEY `category id_idx` (`categoryid`),
   CONSTRAINT `category id` FOREIGN KEY (`categoryid`) REFERENCES `categories` (`categoryid`) ON DELETE CASCADE
-) ENGINE=InnoDB AUTO_INCREMENT=9 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=24 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -95,7 +93,7 @@ CREATE TABLE `promotions` (
   UNIQUE KEY `id_UNIQUE` (`id`),
   KEY `promotions_productid_idx` (`productid`),
   CONSTRAINT `promotions_productid` FOREIGN KEY (`productid`) REFERENCES `products` (`productid`) ON DELETE CASCADE
-) ENGINE=InnoDB AUTO_INCREMENT=9 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=11 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -118,7 +116,7 @@ CREATE TABLE `reviews` (
   KEY `userid_idx` (`userid`),
   CONSTRAINT `reviews_productid` FOREIGN KEY (`productid`) REFERENCES `products` (`productid`) ON DELETE CASCADE,
   CONSTRAINT `reviews_userid` FOREIGN KEY (`userid`) REFERENCES `users` (`userid`) ON DELETE CASCADE ON UPDATE RESTRICT
-) ENGINE=InnoDB AUTO_INCREMENT=7 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=22 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -138,7 +136,7 @@ CREATE TABLE `user_interests` (
   KEY `categoryid_idx` (`categoryid`),
   CONSTRAINT `interests_categoryid` FOREIGN KEY (`categoryid`) REFERENCES `categories` (`categoryid`) ON DELETE CASCADE,
   CONSTRAINT `interests_userid` FOREIGN KEY (`userid`) REFERENCES `users` (`userid`) ON DELETE CASCADE
-) ENGINE=InnoDB AUTO_INCREMENT=9 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=21 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -154,14 +152,14 @@ CREATE TABLE `users` (
   `email` varchar(255) NOT NULL,
   `contact` varchar(10) NOT NULL,
   `password` varchar(255) NOT NULL,
-  `type` varchar(45) NOT NULL,
-  `profile_pic_url` varchar(255) NOT NULL,
+  `type` varchar(45) NOT NULL DEFAULT 'Customer',
+  `profile_pic_url` varchar(255) NOT NULL DEFAULT '/default_profile_pic.png',
   `created_at` datetime DEFAULT CURRENT_TIMESTAMP,
   PRIMARY KEY (`userid`),
   UNIQUE KEY `id_UNIQUE` (`userid`),
   UNIQUE KEY `username_UNIQUE` (`username`),
   UNIQUE KEY `email_UNIQUE` (`email`)
-) ENGINE=InnoDB AUTO_INCREMENT=13 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=32 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 /*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
 
@@ -173,4 +171,4 @@ CREATE TABLE `users` (
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2022-01-02 22:00:33
+-- Dump completed on 2022-02-07  5:20:42

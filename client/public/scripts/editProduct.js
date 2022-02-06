@@ -263,7 +263,7 @@ function deleteImage() {
     }
 
     //Checks if this is the first and only image
-    if (index == 0 && imageQueue.length == 0) {
+    if (index == 0 && images.length == 1) {
         //This is the first and only image, just set it to the default image and return
         image.find("img").attr("src", "/assets/img/blank.png");
         return;

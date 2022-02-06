@@ -191,7 +191,7 @@ function renderProductInfo() {
                 $("#product-name").empty().html(data.name);
 
                 //-- Product Price --//
-                const renderedPrice = renderProductPrice(data.price, promotion.discount);
+                const renderedPrice = renderProductPrice(data.price, (promotion ? promotion.discount : null));
                 $("#product-price").empty().html(renderedPrice);
 
                 //-- Product Description --//
