@@ -144,11 +144,29 @@ function renderProductPrice(price, discount) {
         //There is a ongoing discount for the current item
         return (
             `
-                <span class="text-decoration-line-through">$${price.toFixed(2)}</span>
+                <span class="text-decoration-line-through text-danger fs-6">$${price.toFixed(2)}</span>
                 <span>$${(price - discount).toFixed(2)}</span>
             `
         );
     }
+}
+
+//Gets the time left to a certain date and returns the result as a string
+function timeToDate(date) {
+    //Get current time
+    const firstDate = moment(new Date());
+
+    //Convert date object to moment object
+    const secondDate = moment(date);
+
+    //Get the time difference
+    const timeDiff = moment.duration(secondDate.diff(firstDate));
+
+    //Format a string
+    const result = `${(timeDiff.days() != 0) ? `${timeDiff.days()} days, ` : ""}${timeDiff.hours()}:${timeDiff.minutes()}:${timeDiff.seconds()}`;
+
+    //Return the result
+    return result;
 }
 
 //Renders product info
@@ -163,19 +181,37 @@ function renderProductInfo() {
 
         //Check if any data was obtained
         if (data) {
-            //The product id is valid, render the data
-            //-- Product Category --//
-            $("#category-name").empty().text(data.categoryname);
+            //The product id is valid, check if there are any ongoing promotions for the product
+            Product.query.ongoingPromotions(productid, (promotion) => {
+                //Render the data
+                //-- Product Category --//
+                $("#category-name").empty().text(data.categoryname);
 
-            //-- Product Name --//
-            $("#product-name").empty().html(data.name);
+                //-- Product Name --//
+                $("#product-name").empty().html(data.name);
 
-            //-- Product Price --//
-            const renderedPrice = renderProductPrice(data.price);
-            $("#product-price").empty().html(renderedPrice);
+                //-- Product Price --//
+                const renderedPrice = renderProductPrice(data.price, promotion.discount);
+                $("#product-price").empty().html(renderedPrice);
 
-            //-- Product Description --//
-            $("#product-desc").empty().html(data.description);
+                //-- Product Description --//
+                $("#product-desc").empty().html(data.description);
+
+                //Check if there are any ongoing promotions
+                if (promotion) {
+                    //Convert validity deadline from ms to dd hh:mm:ss
+                    let renderedValidity = timeToDate(promotion.end_date);
+
+                    //Render the promotion validity component every 1s
+                    $("#promotion-validity-container").removeClass("d-none");
+                    $("#promotion-validity").text("Promotion ends in " + renderedValidity);
+
+                    setInterval(() => {
+                        renderedValidity = timeToDate(promotion.end_date);
+                        $("#promotion-validity").text("Promotion ends in " + renderedValidity);
+                    }, 1000);
+                }
+            });
         }
     });
 

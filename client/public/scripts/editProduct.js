@@ -356,6 +356,99 @@ function uploadProductImages(productid, imagesToUpload, token) {
     });
 }
 
+//Populate promotions table
+function populatePromotionsTable() {
+    //Get product id
+    const productid = getProductId();
+
+    //Check if this is an existing product
+    if (productid) {
+        //Retrieve all promotions for the product
+        Product.query.allPromotions(productid, (promotions) => {
+            //Check if theere are any promotions for this product
+            if (promotions && promotions.length > 0) {
+                //There is at least 1 promotion, render the promotions
+                for (let i = 0; i < promotions.length; i++) {
+                    //Select the promotion at the current index
+                    const promotion = promotions[i];
+
+                    //Render the promotion
+                    const renderedPromotion = Product.render.table.promotionRow(promotion, i + 1);
+
+                    //Update the DOM
+                    $("#promotion-list-content").append(renderedPromotion);
+                }
+            }
+        });
+    }
+}
+
+//Create promotion
+function createPromotion() {
+    //-- Verify validity of user input --//
+    //Create a new validator
+    const validator = new Validator("#promotionErrorMessage");
+
+    //Verify promotional value
+    const discount = validator.validate.promotion.value("#discountInput");
+    if (!discount) {
+        return;
+    }
+
+    //Verify promotion start date and time
+    let startTime = validator.validate.promotion.start("#promotion-start-input");
+    if (!startTime) {
+        return;
+    }
+    startTime = startTime.replace("T", " ");
+
+    //Verify promotion end date and time
+    let endTime = validator.validate.promotion.end("#promotion-end-input");
+    if (!endTime) {
+        return;
+    }
+    endTime = endTime.replace("T", " ");
+
+    //All checks passed, get product id
+    const productid = getProductId();
+    
+    //Get bearer token
+    User.retrieveSessionData((userData) => {
+        //Create promotion
+        Product.create.promotion(productid, discount, startTime, endTime, userData.token, (err, response) => {
+            //Check if there was an error
+            if (err) {
+                //There was an error
+
+                //Check what error it is
+                if (err.response.data && err.response.data.error == "PROMO_OVERLAP") {
+                    //Render a error message
+                    $("#promotionErrorMessage").removeClass("text-success").addClass("text-danger");
+                    $("#promotionErrorMessage").text("Promotion overlaps with an existing one");
+                } else {
+                    //Render a error message
+                    $("#promotionErrorMessage").removeClass("text-success").addClass("text-danger");
+                    $("#promotionErrorMessage").text("An error occured. Please try again later");
+                }
+                return;
+            }
+
+            //There was no error, render a success message
+            $("#promotionErrorMessage").removeClass("text-danger").addClass("text-success");
+            $("#promotionErrorMessage").text("Promotion created");
+
+            //Clear input fields
+            $("#discountInput").val();
+            $("#promotion-start-input").val();
+            $("#promotion-end-input").val();
+
+            //Reload the promotions table
+            $("#promotion-list-content").empty();
+            populatePromotionsTable();
+        });
+    });
+}
+
 //Create product
 function createProduct() {
     //-- Verify validity of user input --//
@@ -513,4 +606,7 @@ $(document).ready(async () => {
 
     //Render product info
     renderProductInfo();
+
+    //Populate promotions table
+    populatePromotionsTable();
 });

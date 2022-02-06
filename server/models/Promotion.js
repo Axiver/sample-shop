@@ -142,7 +142,7 @@ const Promotion = {
             } else {
                 //There was no error
                 //Proceed with SQL query
-                const sqlQuery = "SELECT id, productid, discount, start_date, end_date FROM promotions WHERE productid = ?";
+                const sqlQuery = "SELECT id, productid, discount, start_date, end_date FROM promotions WHERE productid = ? ORDER BY created_at DESC";
                 dbConn.query(sqlQuery, [productid], (err, results) => {
                     //Closes the db connection
                     dbConn.end();

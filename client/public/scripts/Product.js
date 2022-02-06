@@ -474,6 +474,105 @@ class Product {
         });
     }
 
+    /**
+     * Queries for all promotions for a particular product
+     * @param {number} productid The id of the product
+     * @param {()} callback Invoked upon completion
+     */
+    static _queryAllPromotions(productid, callback) {
+        //Get a specific review of a product
+        const reqUrl = Product.baseUrl + `/api/promotions/product/` + productid;
+        axios({
+            method: 'get',
+            url: reqUrl,
+            timeout: 1000,
+        }).then((response) => {
+            //Return the result
+            if (callback)
+                callback(response.data);
+            return response.data;
+        }).catch((err) => {
+            //Error encountered, return null
+            if (callback)
+                callback(null);
+            return null;
+        });
+    }
+
+    /**
+     * Queries for all ongoing promotions for a particular product
+     * @param {number} productid The id of the product
+     * @param {()} callback Invoked upon completion
+     */
+    static _queryOngoingPromotion(productid, callback) {
+        //Queries for all promotions for the product
+        Product.query.allPromotions(productid, (data) => {
+            //Check if any rows were returned
+            if (data && data.length > 0) {
+                //At least 1 row was returned
+                const promotions = data;
+
+                //Loop through the promotions and find one that is currently ongoing
+                for (let i = 0; i < promotions.length; i++) {
+                    //Select the promotion at the current index
+                    const promotion = promotions[i];
+                    const startDate = new Date(promotion.start_date);
+                    const endDate = new Date(promotion.end_date);
+
+                    //Check if the promotion at the current index is ongoing
+                    const currDate = new Date();
+                    if (startDate <= currDate && endDate >= currDate) {
+                        //The current promotion is ongoing, invoke the callback with the promotion
+                        console.log("promotion found: ", promotion)
+                        callback(promotion);
+
+                        return;
+                    }
+                }
+
+                //Loop ended and no promotions were found
+                resolve(null);
+            } else {
+                callback(null);
+                return;
+            }
+        });
+    }
+
+    /**
+     * Creates a new promotion for a particular product
+     * @param {number} productid The id of the product
+     * @param {number} value The discount value of the promotion
+     * @param {string} start The start date and time of the promotion
+     * @param {string} end The end date and time of the promotion
+     * @param {string} bearerToken Bearer token
+     * @param {()} callback Invoked upon completion
+     */
+    static _createPromotion(productid, value, start, end, bearerToken, callback) {
+        const reqUrl = User.baseUrl + `/api/promotions/`;
+        axios.post(reqUrl, {
+            productid: productid,
+            discount: value,
+            start_date: start,
+            end_date: end
+        },
+        {
+            headers: { 
+                "Authorization": "Bearer " + bearerToken 
+            }
+        }).then((response) => {
+            //Invoke callback with the response data
+            if (callback)
+                callback(null, response);
+            return;
+        }).catch((err) => {
+            //Error encountered, return the error message
+            if (callback)
+                callback(err);
+            return;
+        });
+    }
+
 
     //-- Render Methods --//
     static _productRating(avgRating) {
@@ -545,46 +644,56 @@ class Product {
                 let productImageUrl = Product.baseUrl + result.data;
                 if (result.data == null)
                     productImageUrl = "/assets/img/default.png";
-                //Check if there are any discounts for the current item
-                if (!discount) {
-                    //There are no ongoing discounts
-                    renderedPrice = `<h6 class="card-text lead fw-normal" style="color: #17E300 !important;">$${productPrice.toFixed(2)}</h6>`;
-                } else {
-                    //There is a ongoing discount for the current item
-                    renderedPrice = `<h6 class="card-text lead fw-normal" style="color: #17E300 !important;"><span class="text-decoration-line-through">$${productPrice.toFixed(2)}</span> $${(productPrice - discount).toFixed(2)}</h6>`;
-                }
 
                 //Get the average ratings of the product
                 Product.query.averageRating(productid, (avgRating) => {
                     //Render the rating stars for the product
                     const productRating = Product.render.product.rating(avgRating);
 
-                    //Return the component
-                    resolve (`
-                        <div class="col d-flex">
-                            <div class="card px-0 shadow border-0">
-                                <!-- Product image-->
-                                <img height="55%" width="100%" style="object-fit: cover;" class="card-img-top" src="${productImageUrl}" alt="..." />
-                                <!-- Product details-->
-                                <div class="card-body p-4">
-                                    <div>
-                                        <!-- Product name-->
-                                        <h5 class="card-title">${productName}</h5>
-                                        ${productRating}
+                    //Check if the product has any ongoing promotions
+                    Product.query.ongoingPromotions(productid, (promotion) => {
+                        //Check if any data was returned
+                        if (promotion && !discount) {
+                            //Set the discount
+                            discount = promotion.discount;
+                        }
+
+                        //Check if there are any discounts for the current item
+                        if (!discount) {
+                            //There are no ongoing discounts
+                            renderedPrice = `<h6 class="card-text lead fw-normal" style="color: #17E300 !important;">$${productPrice.toFixed(2)}</h6>`;
+                        } else {
+                            //There is a ongoing discount for the current item
+                            renderedPrice = `<h6 class="card-text lead fw-normal" style="color: #17E300 !important;"><span class="text-decoration-line-through text-danger fs-6">$${productPrice.toFixed(2)}</span> $${(productPrice - discount).toFixed(2)}</h6>`;
+                        }
+
+                        //Return the component
+                        resolve (`
+                            <div class="col d-flex">
+                                <div class="card px-0 shadow border-0">
+                                    <!-- Product image-->
+                                    <img height="55%" width="100%" style="object-fit: cover;" class="card-img-top" src="${productImageUrl}" alt="..." />
+                                    <!-- Product details-->
+                                    <div class="card-body p-4">
+                                        <div>
+                                            <!-- Product name-->
+                                            <h5 class="card-title">${productName}</h5>
+                                            ${productRating}
+                                        </div>
                                     </div>
-                                </div>
-                                <!-- Product Footer-->
-                                <div class="card-footer d-flex p-4 pt-0 border-top-0 bg-transparent justify-content-between align-items-center">
-                                    <!-- Product price-->
-                                    <div class="d-inline-block">
-                                        ${renderedPrice}
+                                    <!-- Product Footer-->
+                                    <div class="card-footer d-flex p-4 pt-0 border-top-0 bg-transparent justify-content-between align-items-center">
+                                        <!-- Product price-->
+                                        <div class="d-inline-block">
+                                            ${renderedPrice}
+                                        </div>
+                                        <!-- View Item Button -->
+                                        <div class="text-center d-inline-block"><a class="btn btn-outline-success mt-auto text-nowrap" href="/product/${productid}">View item</a></div>
                                     </div>
-                                    <!-- View Item Button -->
-                                    <div class="text-center d-inline-block"><a class="btn btn-outline-success mt-auto" href="/product/${productid}">View item</a></div>
                                 </div>
                             </div>
-                        </div>
-                    `);
+                        `);
+                    });
                 });
             });
         });
@@ -603,55 +712,64 @@ class Product {
             //Render the price
             let renderedPrice = "";
 
-            //Obtain the product image if any
-            Product.query.image(productid, 1, (result) => {
-                //Format the product image url
-                let productImageUrl = Product.baseUrl + result.data;
-
-                //Check if there are any product images for this item
-                if (result.data == null)
-                    productImageUrl = "/assets/img/default.png";
-
-                //Check if there are any discounts for the current item
-                if (!discount) {
-                    //There are no ongoing discounts
-                    renderedPrice = `<h6 class="card-text lead fw-normal" style="color: #17E300 !important;">$${productPrice.toFixed(2)}</h6>`;
-                } else {
-                    //There is a ongoing discount for the current item
-                    renderedPrice = `<h6 class="card-text lead fw-normal" style="color: #17E300 !important;"><span class="text-decoration-line-through">$${productPrice.toFixed(2)}</span> $${(productPrice - discount).toFixed(2)}</h6>`;
+            //Check if the product has any ongoing promotions
+            Product.query.ongoingPromotions(productid, (promotion) => {
+                //Check if any data was returned
+                if (promotion && !discount) {
+                    //Set the discount
+                    discount = promotion.discount;
                 }
 
-                //Get the average ratings of the product
-                Product.query.averageRating(productid, (avgRating) => {
-                    //Render the rating stars for the product
-                    const productRating = Product.render.product.rating(avgRating);
+                //Obtain the product image if any
+                Product.query.image(productid, 1, (result) => {
+                    //Format the product image url
+                    let productImageUrl = Product.baseUrl + result.data;
 
-                    //Return the component
-                    resolve (`
-                        <div class="col mb-5 d-flex">
-                            <div class="card px-0 shadow border-0">
-                                <!-- Product image-->
-                                <img height="55%" width="100%" style="object-fit: cover;" class="card-img-top" src="${productImageUrl}" alt="..." />
-                                <!-- Product details-->
-                                <div class="card-body p-4">
-                                    <div>
-                                        <!-- Product name-->
-                                        <h5 class="card-title">${productName}</h5>
-                                        ${productRating}
+                    //Check if there are any product images for this item
+                    if (result.data == null)
+                        productImageUrl = "/assets/img/default.png";
+
+                    //Check if there are any discounts for the current item
+                    if (!discount) {
+                        //There are no ongoing discounts
+                        renderedPrice = `<h6 class="card-text lead fw-normal" style="color: #17E300 !important;">$${productPrice.toFixed(2)}</h6>`;
+                    } else {
+                        //There is a ongoing discount for the current item
+                        renderedPrice = `<h6 class="card-text lead fw-normal" style="color: #17E300 !important;"><span class="text-decoration-line-through text-danger fs-6">$${productPrice.toFixed(2)}</span> $${(productPrice - discount).toFixed(2)}</h6>`;
+                    }
+
+                    //Get the average ratings of the product
+                    Product.query.averageRating(productid, (avgRating) => {
+                        //Render the rating stars for the product
+                        const productRating = Product.render.product.rating(avgRating);
+
+                        //Return the component
+                        resolve (`
+                            <div class="col mb-5 d-flex">
+                                <div class="card px-0 shadow border-0">
+                                    <!-- Product image-->
+                                    <img height="55%" width="100%" style="object-fit: cover;" class="card-img-top" src="${productImageUrl}" alt="..." />
+                                    <!-- Product details-->
+                                    <div class="card-body p-4">
+                                        <div>
+                                            <!-- Product name-->
+                                            <h5 class="card-title">${productName}</h5>
+                                            ${productRating}
+                                        </div>
                                     </div>
-                                </div>
-                                <!-- Product Footer-->
-                                <div class="card-footer d-flex p-4 pt-0 border-top-0 bg-transparent justify-content-between align-items-center">
-                                    <!-- Product price-->
-                                    <div class="d-inline-block">
-                                        ${renderedPrice}
+                                    <!-- Product Footer-->
+                                    <div class="card-footer d-flex p-4 pt-0 border-top-0 bg-transparent justify-content-between align-items-center">
+                                        <!-- Product price-->
+                                        <div class="d-inline-block">
+                                            ${renderedPrice}
+                                        </div>
+                                        <!-- View Item Button -->
+                                        <div class="text-center d-inline-block"><a class="btn btn-outline-success mt-auto text-nowrap" href="/product/${productid}">View item</a></div>
                                     </div>
-                                    <!-- View Item Button -->
-                                    <div class="text-center d-inline-block"><a class="btn btn-outline-success mt-auto" href="/product/${productid}">View item</a></div>
                                 </div>
                             </div>
-                        </div>
-                    `);
+                        `);
+                    });
                 });
             });
         });
@@ -745,12 +863,32 @@ class Product {
         )
     }
 
+    /**
+     * Renders a promotion table row
+     * @param {{}} promotion Object containing promotion details
+     * @param {number} rownumber The id of the row being rendered
+     */
+    static _renderTablePromotionRow(promotion, rownumber) {
+        //Return the component
+        return (
+            `
+            <tr class="text-center">
+                <th class="align-middle" scope="row">${rownumber}</th>
+                <td class="align-middle text-start">${promotion.discount.toFixed(2)}</td>
+                <td class="align-middle">${promotion.start_date}</td>
+                <td class="align-middle">${promotion.end_date}</td>
+            </tr>
+            `
+        )
+    }
+
 
     //-- Expose Methods --//
     static create = {
         review: this._createReview,
         product: this._createProduct,
-        image: this._createImage
+        image: this._createImage,
+        promotion: this._createPromotion
     }
 
     static modify = {
@@ -774,7 +912,9 @@ class Product {
         imageCount: this._imageCount,
         averageRating: this._averageRating,
         reviews: this._reviews,
-        review: this._reviewById
+        review: this._reviewById,
+        allPromotions: this._queryAllPromotions,
+        ongoingPromotions: this._queryOngoingPromotion
     }
 
     static render = {
@@ -788,7 +928,8 @@ class Product {
             imageSlide: this._imageCarouselSlide
         },
         table: {
-            row: this._renderTableRow
+            row: this._renderTableRow,
+            promotionRow: this._renderTablePromotionRow
         }
     }
 }

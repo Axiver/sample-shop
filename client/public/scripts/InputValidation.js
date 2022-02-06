@@ -444,6 +444,91 @@ class Validator {
         return isValid;
     }
 
+    /**
+     * Validates promotion value
+     * @param {string} selector JQuery selector for the promotion value input field
+     */
+    _validatePromotionValue = (selector) => {
+        //Validate the promotion value input field
+        const isValid = this._validateInput(selector, (productPrice) => {
+            //Ensure that the promotion value is not empty
+            if (productPrice.length == 0) {
+                return "Promotion value cannot be empty";
+            }
+
+            //Ensure that the promotion value is a number
+            if (isNaN(productPrice)) {
+                return "Promotion value must be a valid number";
+            }
+
+            //Ensure that the promotion value is more than 0
+            if (productPrice <= 0) {
+                return "Promotion value must be more than 0";
+            }
+        });
+
+        //Return the outcome
+        return isValid;
+    }
+
+    /**
+     * Validates promotion start date and time
+     * @param {string} selector JQuery selector for the promotion start input field
+     */
+     _validatePromotionStart = (selector) => {
+        //Validate the promotion start input field
+        const isValid = this._validateInput(selector, (start) => {
+            //Ensure that the promotion start is not empty
+            if (start.length == 0) {
+                return "Promotion must have a start date and time";
+            }
+
+            //Ensure that the promotion start is not before new Date()
+            if (new Date(start) < new Date()) {
+                return "Start date cannot be in the past"
+            }
+        });
+
+        //Return the outcome
+        return isValid;
+    }
+
+    /**
+     * Validates promotion end date and time
+     * @param {string} selector JQuery selector for the promotion end input field
+     * @param {string} startDateSelector Jquery selector for the promotion start input field
+     */
+     _validatePromotionEnd = (selector, startDateSelector) => {
+        //Validate the promotion end input field
+        const isValid = this._validateInput(selector, (end) => {
+            //Ensure that the promotion end is not empty
+            if (end.length == 0) {
+                return "Promotion must have a end date and time";
+            }
+
+            //Ensure that the promotion end is not before new Date()
+            if (new Date(end) < new Date()) {
+                return "End date cannot be in the past";
+            }
+
+            //Get value of promotion start
+            const promotionStart = $(startDateSelector).val();
+
+            //Ensure that the promotion end is not the same as promotion start
+            if (end == promotionStart) {
+                return "Promotion cannot start and end at the same time";
+            }
+
+            //Ensure that the promotion end is not before promotion start
+            if (new Date(end) < new Date(promotionStart)) {
+                return "Promotion cannot end before it starts";
+            }
+        });
+
+        //Return the outcome
+        return isValid;
+    }
+
     //Expose the methods
     validate = {
         username: this._validateUsername,
@@ -464,6 +549,11 @@ class Validator {
         category: {
             name: this._validateCategoryName,
             description: this._validateCategoryDescription
+        },
+        promotion: {
+            value: this._validatePromotionValue,
+            start: this._validatePromotionStart,
+            end: this._validatePromotionEnd
         }
     }
 }

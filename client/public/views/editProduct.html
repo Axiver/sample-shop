@@ -73,24 +73,64 @@
                     <a class="btn btn-outline-danger" href="/admin">Cancel</a>
                     <button id="createButton" class="btn btn-outline-success" onclick="createProduct()">Create</button>
                 </div>
-                <div class="container-fluid px-0 mt-5 py-5">
-                    <div>
-                        <h1>Promotions</h1>
+                <div class="row justify-content-between">
+                    <div class="container-fluid px-0 mt-5 py-5 col-6">
+                        <div>
+                            <h1>Promotions</h1>
+                        </div>
+                        <div class="mt-5">
+                            <div>
+                                <table class="table table-striped mt-4">
+                                    <thead>
+                                        <tr class="text-center">
+                                            <th scope="col">#</th>
+                                            <th class="text-start" scope="col">Discount ($)</th>
+                                            <th scope="col">Starts At</th>
+                                            <th scope="col">Ends At</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="promotion-list-content"></tbody>
+                                </table>
+                            </div>
+                        </div>
                     </div>
-                    <div class="mt-5 row">
-                        <div class="col-7">
-                            <table class="table table-striped mt-4">
-                                <thead>
-                                    <tr class="text-center">
-                                        <th scope="col">#</th>
-                                        <th class="text-start" scope="col">Discount ($)</th>
-                                        <th scope="col">Starts At</th>
-                                        <th scope="col">Ends At</th>
-                                        <th scope="col"></th>
-                                    </tr>
-                                </thead>
-                                <tbody id="product-list-content"></tbody>
-                            </table>
+                    <div class="container-fluid mt-5 py-5 col-5 px-3">
+                        <div>
+                            <h4 id="promotionFormHeader">Create Promotion</h4>
+                        </div>
+                        <div class="mt-4">
+                            <label for="discountInput" class="form-label">Discount ($)</label>
+                            <input type="number" class="form-control mt-1" id="discountInput" placeholder="$00.00">
+                        </div>
+                        <div class="mt-4">
+                            <h6>Promotion Start</h6>
+                        </div>
+                        <div class="mt-2 d-flex align-items-center">
+                            <div>
+                                <div class="container-fluid px-0 text-start">
+                                    <label for="discountInput" class="form-label">Date and Time</label>
+                                </div>
+                                <input class="px-2" type="datetime-local" id="promotion-start-input" step="1">
+                            </div>
+                        </div>
+                        <div class="mt-4">
+                            <h6>Promotion End</h6>
+                        </div>
+                        <div class="mt-2 d-flex align-items-center">
+                            <div>
+                                <div class="container-fluid px-0 text-start">
+                                    <label for="discountInput" class="form-label">Date and Time</label>
+                                </div>
+                                <input class="px-2" type="datetime-local" id="promotion-end-input" step="1">
+                            </div>
+                        </div>
+                        <div class="mt-4 d-flex justify-content-between">
+                            <div>
+                                <h6 id="promotionErrorMessage" class="fs-6 text-danger"></h6>
+                            </div>
+                            <div>
+                                <button id="createPromotionButton" onclick="createPromotion()" class="btn btn-primary">Create</button>
+                            </div>
                         </div>
                     </div>
                 </div>

@@ -59,7 +59,8 @@ router.post("/", [isLoggedInMiddleware, isAdminMiddleware], (req, res) => {
                     console.log(err);
                     //Checks if the error is due to invalid datetime or invalid discount value or the promotion coincides with a existing one
                     if (err == "INVALID_DATETIME" || err == "INVALID_DISCOUNT_VALUE" || err == "PROMO_OVERLAP") {
-                        return res.status(422).send();
+                        let response = {"error": err};
+                        return res.status(422).send(response);
                     }
                     return res.status(500).send();
                 } else {
