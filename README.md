@@ -26,7 +26,8 @@ After downloading Nodejs and npm, `cd` into the directory you installed the expr
 3. Edit `/models/databaseConfig.js` with your editor of choice and modify `host`, `port`, `user` and `password` such that the express app is able to communicate with your MySQL server later on.
 4. Load `db-init.sql` in MySQL Workbench and execute it to create the necessary tables and schemas for the app to work.
 5. Ensure that your MySQL server is up and running.
-6. Execute `node server.js`
+6. Create `/uploads/product_images/`
+7. Execute `node server.js`
 
 The backend server will now be running at http://localhost:3000
 
