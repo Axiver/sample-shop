@@ -1,7 +1,4 @@
-/**
- * Xavier Teo Zai Ken (p2104261)
- * DIT/1B/02
- */
+
 //-- Class --//
 class User {
     //-- Static properties --//

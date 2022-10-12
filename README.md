@@ -1,6 +1,6 @@
 # BED-CA1
 
-API Service for SP IT!
+This project was created to be submitted for my school's Back-end Web Development module.
 
 ## Getting started
 
@@ -39,24 +39,11 @@ The backend server will now be running at http://localhost:3000
 
 The frontend server will now be running at http://localhost:3001
 
+### Making an Admin Account
 
-## Advanced Features
-
-This app has many advanced features, such as:
-1. Password hashing
-2. Email format validation
-3. Input formatting (Remove spaces from the ends)
-4. Support for promotional periods
-5. Ensures that there can only be one promotion ongoing for any given product
-6. Support for multiple product images for a given product
-7. Support for retrieval of a particular image of a particular product
-
-## Database Structure
-A word document showing the tables created and their linkage is available in `db-structure.docx`.
-
-## API Documentation
-Documentation for endpoints that are part of the bonus requirements (image uploading and retrieval, promotional period creation/retrieval/deletion) are available at [Endpoints](##Endpoints).
-Screenshots of every endpoint (basic and advanced included) being tested are available at `screenshots.docx`. 
+To make an account admin, you first need to create an account at http://localhost:3001/register.
+Once done, update the `type` column in the `users` table in the database of the newly created account to reflect the value of `Admin`.
+The newly created account will now have administrative rights.
 
 ## Endpoints
 

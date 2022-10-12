@@ -1,7 +1,3 @@
-/**
- * Xavier Teo Zai Ken (p2104261)
- * DIT/1B/02
- */
 //Import required modules
 var mysql = require('mysql');
 
@@ -12,8 +8,8 @@ var dbconnect = {
             host: "localhost",
             port: 3306,
             user: "root",
-            password: "defaultPassword",
-            database: "bed_ca1",
+            password: "password",
+            database: "db",
             dateStrings: true
         });     
         return conn;

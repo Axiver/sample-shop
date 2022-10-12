@@ -1,7 +1,3 @@
-/**
- * Xavier Teo Zai Ken (p2104261)
- * DIT/1B/02
- */
 //Load required modules and configs
 const bcrypt = require("bcrypt");
 const db = require("./databaseConfig");
