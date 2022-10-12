@@ -1,6 +1,7 @@
-# BED-CA1
+# Sample-Shop
 
 This project was created to be submitted for my school's Back-end Web Development module.
+It is not feature-complete, and was created with the intention to fulfil and exceed the requirements of my assignment.
 
 ## Getting started
 
